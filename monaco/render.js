@@ -1,19 +1,21 @@
 // @ts-check
 /** @typedef {import('./monaco')} */
 /** @typedef {import('../global')} */
-;(function () {
-  const BORDER_SIZE = 4
 
-  function setCodeByUrl() {
-    const hash = location.hash.slice(1)
-    const code = hash ? base64(hash, false) : `
-// try it, press \`(Ctrl|Cmd) + Enter\` to run
+;const EXAMPLE_CODE = `// try it, press \`(Ctrl|Cmd) + Enter\` to run
 async function main() {
     console.log(await 'https://jsonplaceholder.typicode.com/todos/1')
 }
 
 main()
 `.trim()
+
+;(function () {
+  const BORDER_SIZE = 4
+
+  function setCodeByUrl() {
+    const hash = location.hash.slice(1)
+    const code = hash ? base64(hash, false) : EXAMPLE_CODE
     editor.setValue(code)
   }
   // watch hash change
