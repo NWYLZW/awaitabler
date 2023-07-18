@@ -1,0 +1,32 @@
+{
+  "name": "awaitabler",
+  "version": "0.1.0",
+  "description": "Awaited.",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "await-auto-box.js"
+  ],
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "require": "./index.js"
+    },
+    "./await-auto-box": "./await-auto-box.js"
+  },
+  "scripts": {
+  },
+  "keywords": [
+    "Promise",
+    "await",
+    "awaitable",
+    "request",
+    "fetch"
+  ],
+  "author": "YiJie <yijie4188@gmail.com>",
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  },
+  "license": "MIT"
+}
