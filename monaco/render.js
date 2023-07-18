@@ -1,6 +1,7 @@
 // @ts-check
+/** @typedef {import('./monaco')} */
+/** @typedef {import('../global')} */
 ;(function () {
-  /** @typedef {import('../global')} */
   const BORDER_SIZE = 4
 
   function setCodeByUrl() {

@@ -1,5 +1,3 @@
-import '../monaco/monaco'
-
 declare global {
     export var define: Function & Record<string, any>
     export var exports: Record<string, any>
