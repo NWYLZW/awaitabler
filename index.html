@@ -71,8 +71,22 @@
       display: flex;
       flex-direction: row;
       align-items: center;
-      padding: 0 10px;
       box-sizing: border-box;
+    }
+    div#app > .main > div.code-editor > div.menu > button {
+      padding: 0 20px;
+      height: 100%;
+      background-color: #0000;
+      color: #fff;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-size: 1.5em;
+      font-weight: bold;
+      transition: .3s;
+    }
+    div#app > .main > div.code-editor > div.menu > button:hover {
+      background-color: #0002;
     }
     div#app > .main > div.code-editor > div#monaco-editor {
       width: 680px;
@@ -98,33 +112,6 @@
       padding: 20px 0;
       min-width: 300px;
       overflow-y: auto;
-    }
-
-    div#app > .main > div#start {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      bottom: 180px;
-      left: 10px;
-      width: 1.2em;
-      height: 1.2em;
-      padding: 10px;
-      font-size: 1.2em;
-      color: #65b766;
-      cursor: pointer;
-      user-select: none;
-      border: 1px solid lightgray;
-      border-radius: 4px;
-      background-color: white;
-      transition: 0.3s ease-in-out;
-    }
-
-    div#app > .main > div#start:hover {
-      bottom: 210px;
-      background-color: #65b766;
-      color: white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
   </style>
   <style lang="css" data-name="logs">
