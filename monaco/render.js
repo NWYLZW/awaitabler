@@ -7,7 +7,10 @@
 // the bug need a semi-colon to fix
 ;const EXAMPLE_CODE = `// try it, press \`(Ctrl|Cmd) + Enter\` to run
 async function main() {
-    console.log(await 'https://jsonplaceholder.typicode.com/todos/1')
+    const resp = /** @type {Response} */ (
+        await 'https://jsonplaceholder.typicode.com/todos/1'
+    )
+    console.log(resp.status, resp.statusText)
 }
 
 main()
