@@ -1,0 +1,35 @@
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="./await-auto-box.js"></script>
+<script src="./index.js"></script>
+<script>
+  awaitabler.registerAll()
+</script>
+<script>
+  const originalConsole = {}
+  const consoleMethods = ['log', 'warn', 'error', 'info', 'clear']
+  consoleMethods.forEach(m => {
+    originalConsole[m] = console[m]
+    console[m] = (...args) => {
+      originalConsole[m](...args)
+      parent.postMessage({
+        type: 'console',
+        method: m,
+        args
+      }, '*')
+    }
+  })
+  // listen iframe messages
+  window.addEventListener('message', e => {
+    const { type, code, lang } = e.data
+    /** @type {string} */
+    let runCode
+    if (type === 'run') {
+      switch (lang) {
+        case 'javascript':
+          const { code: transformCode } = Babel.transform(code, { presets: ['es2015'], plugins: ['await-auto-box'] })
+          eval(transformCode)
+          break
+      }
+    }
+  })
+</script>

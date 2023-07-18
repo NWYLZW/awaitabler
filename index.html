@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Awaitabler</title>
+
+  <style lang="css" data-name="base">
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    div.message {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translate(-50%, -150%);
+      padding: 1em;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: 0.3s ease-in-out;
+    }
+
+    div.message.show {
+      opacity: 1;
+      transform: translateX(-50%);
+    }
+  </style>
+  <style lang="css" data-name="app">
+    div#app {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+
+    div#app > header {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1em 6em;
+      background-color: #ec8331;
+      color: #fff;
+    }
+    div#app > .main {
+      flex-grow: 1;
+      display: flex;
+    }
+
+    div#app > .main > div.code-editor {
+      position: relative;
+      max-width: 70vw;
+      height: 100%;
+    }
+    div#app > .main > div.code-editor > div.menu {
+      width: 100%;
+      height: 53px;
+      background-color: #ffc395;
+      color: #fff;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+    div#app > .main > div.code-editor > div#monaco-editor {
+      width: 500px;
+      min-width: 412px !important;
+      max-width: 100%;
+      height: calc(100% - 53px);
+    }
+    div#app > .main > div.code-editor > div#monaco-editor::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      background-color: #ec8331;
+      cursor: ew-resize;
+      transition: .3s;
+    }
+
+    div#app > .main > div.logs {
+      position: relative;
+      flex-grow: 1;
+      padding: 20px;
+      min-width: 300px;
+      overflow-y: auto;
+    }
+
+    div#app > .main > div#start {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      bottom: 180px;
+      left: 10px;
+      width: 1.2em;
+      height: 1.2em;
+      padding: 10px;
+      font-size: 1.2em;
+      color: #65b766;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid lightgray;
+      border-radius: 4px;
+      background-color: white;
+      transition: 0.3s ease-in-out;
+    }
+
+    div#app > .main > div#start:hover {
+      bottom: 210px;
+      background-color: #65b766;
+      color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+  <style lang="css" data-name="logs">
+    div#app div.logs__empty {
+      width: 500px;
+      margin: 0 auto;
+      color: #aaa;
+    }
+
+    div#app div.logs__empty>div.title {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    div#app div.logs__empty>div.desc {
+      font-size: 1em;
+      font-weight: normal;
+    }
+
+    div#app>div.logs>div.log {
+      padding: 0 10px;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      column-gap: 10px;
+    }
+
+    div#app>div.logs>div.log:not(:first-child) {
+      border-top: 1px solid #ccc;
+    }
+
+    div#app>div.logs>div.log.output-warn {
+      background-color: #FEFBE7;
+    }
+
+    div#app>div.logs>div.log.output-error {
+      background-color: #FCF1F0;
+    }
+
+    div#app>div.logs>div.log>div.prefix {
+      width: 10px;
+      user-select: none;
+      color: #aaa;
+    }
+
+    div#app>div.logs>div.log>pre {
+      margin: 0;
+      padding: 3px;
+      flex-grow: 1;
+    }
+  </style>
+  <link rel="stylesheet" data-name="vs/editor/editor.main" href="./monaco/min/vs/editor/editor.main.css">
+</head>
+
+<body>
+  <div id="app">
+    <header>
+      <h1 style="margin: 0">
+        <a href="https://github.com/NWYLZW/awaitabler" style="color: #fff; text-decoration: none">
+          Awaitabler
+        </a>
+      </h1>
+    </header>
+    <div class="main">
+      <div id="start">▶</div>
+      <div class="code-editor">
+        <div class="menu">
+          <button id="run">Run</button>
+        </div>
+        <div id="monaco-editor">
+        </div>
+      </div>
+      <div class="logs">
+      </div>
+    </div>
+  </div>
+  <iframe id="iframe" src="./iframe.html" style="display: none"></iframe>
+
+  <template id="log-template">
+    <div class="log {{type}}">
+      <div class="prefix">{{prefix}}</div>
+      <pre id="code-input-{{id}}" data-lang="{{lang}}">{{code}}</pre>
+    </div>
+  </template>
+
+  <template id="logs-empty-template">
+    <div class="logs__empty">
+      <div class="title">
+        No logs
+      </div>
+      <div class="desc">
+        You can run code in the editor above by pressing <code>
+        <<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>> + <kbd>Enter</kbd>
+    </code>
+      </div>
+      <div class="more">
+        <section>
+          <h3>Help</h3>
+          <ul>
+            <li>
+              run code:
+              <code>
+            <<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>> + <kbd>Enter</kbd>
+            </code>
+            </li>
+            <li>
+              share code:
+              <code>
+            <<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>> + <kbd>S</kbd>
+            </code>
+            </li>
+            <li>
+              prev code:
+              <code>
+            <<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>> + <kbd>Up</kbd>
+            </code>
+            </li>
+            <li>
+              next code:
+              <code>
+            <<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>> + <kbd>Down</kbd>
+            </code>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h3>Examples</h3>
+          <ul>
+            <li>
+              <a href="#console.log(...10)%0A">Iteraeur Number</a>
+            </li>
+            <li>
+              <a href="#console.log(...%2F0~10%2F)%0A">Iteraeur RegExp</a>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h3>About</h3>
+          <p>
+            <a href="https://github.com/NWYLZW/iterateur" style="text-decoration: none">Iterateur</a>
+            is a <span style="color: dodgerblue">powerful</span> <span style="color: orangered">iterator</span> for
+            JavaScript.
+          </p>
+        </section>
+      </div>
+    </div>
+  </template>
+
+  <template id="message-template">
+    <div class="message">
+      {{content}}
+    </div>
+  </template>
+
+  <script>
+    var require = { paths: { vs: './monaco/min/vs' } }
+  </script>
+  <script src="./monaco/min/vs/loader.js"></script>
+  <script src="./monaco/min/vs/editor/editor.main.nls.js"></script>
+  <script src="./monaco/min/vs/editor/editor.main.js"></script>
+
+  <script data-name="lib">
+    ;(function () {
+      window.base64 = function (str, isDecode = true) {
+        return isDecode ? decodeURIComponent(atob(str)) : btoa(encodeURIComponent(str))
+      }
+      const tmplCache = {}
+      /**
+       * create a template from a template node
+       *
+       * @param {string} tmplId
+       * @param {Record<string, any>} data
+       * @returns {Element}
+       */
+      window.createEleByTmpl = function (tmplId, data) {
+        const tmpl = tmplCache[tmplId] || (tmplCache[tmplId] = document.getElementById(tmplId).innerHTML.trim())
+
+        const div = document.createElement('div')
+        div.innerHTML = Object.keys(data).reduce((acc, key) => {
+          return acc.replace(new RegExp(`{{${key}}}`, 'g'), data[key])
+        }, tmpl)
+        return div.children[0]
+      }
+      /**
+       * copy content to clipboard
+       * @param {string} content
+       */
+      window.copyToClipboard = function (content) {
+        const input = document.createElement('input')
+        input.value = content
+        document.body.appendChild(input)
+        input.select()
+        document.execCommand('copy')
+        document.body.removeChild(input)
+      }
+      let messages = []
+      /**
+       * display a message
+       * @param {string} content
+       * @param {number} duration
+       */
+      window.showMessage = function (content, duration = 3000) {
+        const message = createEleByTmpl('message-template', { content })
+        // compute message top
+        const top = messages.reduce((acc, msg) => {
+          return acc + msg.offsetHeight + 10
+        }, 10)
+        message.style.top = top + 'px'
+        document.body.appendChild(message)
+        messages.push(message)
+        setTimeout(() => {
+          message.classList.add('show')
+        }, 0)
+        setTimeout(() => {
+          message.classList.remove('show')
+          setTimeout(() => {
+            document.body.removeChild(message)
+            messages = messages.filter((m) => m !== message)
+          }, 300)
+        }, duration)
+      }
+    })()
+  </script>
+
+  <script data-name="resolve-log">
+    const logs = document.querySelector('div.logs')
+    const iframe = document.getElementById('iframe')
+
+    ;(function () {
+      let isEmptied = false
+      function setLogsIsEmpty() {
+        logs.innerHTML = ''
+        const empty = createEleByTmpl('logs-empty-template', {})
+        logs.appendChild(empty)
+        isEmptied = true
+      }
+      setLogsIsEmpty()
+
+      /**
+       * @type {{
+       *   code: string;
+       *   lang: string;
+       * }[]}
+       */
+      window.historyCodes = []
+
+      function print(
+  /** @type {
+   * | 'input'
+   * | `output-${'info' | 'log' | 'warn' | 'error'}`
+   * } */ type,
+  /** @type {string} */ code,
+  /** @type {string} */ lang
+      ) {
+        if (isEmptied) {
+          logs.innerHTML = ''
+          isEmptied = false
+        }
+        const log = createEleByTmpl('log-template', {
+          type,
+          code,
+          lang,
+          prefix: type === 'input' ? '>' : '',
+          id: Date.now()
+        })
+        logs.appendChild(log)
+        logs.scrollTop = logs.scrollHeight
+
+        monaco.editor.colorizeElement(log.querySelector('pre'), {})
+        type === 'input' && historyCodes.push({ code, lang })
+      }
+
+      window.run = function run(code, lang) {
+        print('input', code, lang)
+        iframe.contentWindow.postMessage({ type: 'run', code, lang }, '*')
+      }
+
+      // listen iframe messages
+      window.addEventListener('message', e => {
+        const { type, method, args } = e.data
+        if (type === 'console') {
+          if (method === 'clear') {
+            setLogsIsEmpty()
+          } else {
+            print(`output-${method}`, args.map(arg => JSON.stringify(arg)).join(' '), 'javascript')
+          }
+        }
+      })
+    })()
+  </script>
+
+  <script data-name="monaco" src="./monaco/render.js"></script>
+</body>
+</html>
