@@ -18,7 +18,7 @@ main()
 
   function setCodeByUrl() {
     const hash = location.hash.slice(1)
-    const code = hash ? base64(hash, false) : EXAMPLE_CODE
+    const code = hash ? decodeURIComponent(atob(hash)) : EXAMPLE_CODE
     editor.setValue(code)
   }
   // watch hash change
@@ -32,7 +32,7 @@ main()
   setCodeByUrl()
   let historyIndex = -1
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-    location.hash = `#${base64(editor.getValue())}`
+    location.hash = `#${btoa(encodeURIComponent(editor.getValue()))}`
     // copy url to clipboard
     copyToClipboard(location.href)
     showMessage('<h3 style="margin: 0">url copied to clipboard, share it with your friends!</h3>')

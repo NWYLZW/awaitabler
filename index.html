@@ -54,6 +54,7 @@
     }
     div#app > .main {
       flex-grow: 1;
+      height: calc(100% - 57.5px);
       display: flex;
     }
 
@@ -94,7 +95,7 @@
     div#app > .main > div.logs {
       position: relative;
       flex-grow: 1;
-      padding: 20px;
+      padding: 20px 0;
       min-width: 300px;
       overflow-y: auto;
     }
@@ -127,23 +128,23 @@
     }
   </style>
   <style lang="css" data-name="logs">
-    div#app div.logs__empty {
+    div.logs__empty {
       width: 500px;
       margin: 0 auto;
       color: #aaa;
     }
 
-    div#app div.logs__empty>div.title {
+    div.logs__empty>div.title {
       font-size: 1.5em;
       font-weight: bold;
     }
 
-    div#app div.logs__empty>div.desc {
+    div.logs__empty>div.desc {
       font-size: 1em;
       font-weight: normal;
     }
 
-    div#app>div.logs>div.log {
+    div.logs>div.log {
       padding: 0 10px;
       display: flex;
       flex-direction: row;
@@ -151,25 +152,25 @@
       column-gap: 10px;
     }
 
-    div#app>div.logs>div.log:not(:first-child) {
+    div.logs>div.log:not(:first-child) {
       border-top: 1px solid #ccc;
     }
 
-    div#app>div.logs>div.log.output-warn {
+    div.logs>div.log.output-warn {
       background-color: #FEFBE7;
     }
 
-    div#app>div.logs>div.log.output-error {
+    div.logs>div.log.output-error {
       background-color: #FCF1F0;
     }
 
-    div#app>div.logs>div.log>div.prefix {
+    div.logs>div.log>div.prefix {
       width: 10px;
       user-select: none;
       color: #aaa;
     }
 
-    div#app>div.logs>div.log>pre {
+    div.logs>div.log>pre {
       margin: 0;
       padding: 3px;
       flex-grow: 1;
@@ -188,7 +189,6 @@
       </h1>
     </header>
     <div class="main">
-      <div id="start">▶</div>
       <div class="code-editor">
         <div class="menu">
           <button id="run">Run</button>
@@ -287,9 +287,6 @@
 
   <script data-name="lib">
     ;(function () {
-      window.base64 = function (str, isDecode = true) {
-        return isDecode ? decodeURIComponent(atob(str)) : btoa(encodeURIComponent(str))
-      }
       const tmplCache = {}
       /**
        * create a template from a template node
