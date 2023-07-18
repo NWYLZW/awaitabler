@@ -1,7 +1,10 @@
 // @ts-check
+// @ts-ignore
 /** @typedef {import('./monaco')} */
 /** @typedef {import('../global')} */
 
+// import('./monaco') will shot error in next line
+// the bug need a semi-colon to fix
 ;const EXAMPLE_CODE = `// try it, press \`(Ctrl|Cmd) + Enter\` to run
 async function main() {
     console.log(await 'https://jsonplaceholder.typicode.com/todos/1')
