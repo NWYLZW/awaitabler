@@ -14,7 +14,12 @@
       parent.postMessage({
         type: 'console',
         method: m,
-        args
+        args: JSON.stringify(args.map(a => {
+          if (a instanceof Error) {
+            return { message: a.message, stack: a.stack }
+          }
+          return a
+        }))
       }, '*')
     }
   })
@@ -26,8 +31,12 @@
     if (type === 'run') {
       switch (lang) {
         case 'javascript':
-          const { code: transformCode } = Babel.transform(code, { presets: ['es2015'], plugins: ['await-auto-box'] })
-          eval(transformCode)
+          const { code: transformCode } = Babel.transform(code, {
+            presets: ['es2015'],
+            plugins: ['await-auto-box']
+          })
+          try { eval(transformCode) }
+          catch (e) { console.error(e) }
           break
       }
     }

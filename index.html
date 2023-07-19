@@ -150,6 +150,9 @@
     div.logs>div.log.output-error {
       background-color: #FCF1F0;
     }
+    div.logs>div.log.output-error .mtk1 {
+      color: #D8000C;
+    }
 
     div.logs>div.log>div.prefix {
       width: 10px;
@@ -161,6 +164,10 @@
       margin: 0;
       padding: 3px;
       flex-grow: 1;
+      width: 0;
+      /* auto wrap */
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
   </style>
   <link rel="stylesheet" data-name="vs/editor/editor.main" href="./monaco/min/vs/editor/editor.main.css">
@@ -353,14 +360,15 @@
        */
       window.historyCodes = []
 
-      function print(
-  /** @type {
-   * | 'input'
-   * | `output-${'info' | 'log' | 'warn' | 'error'}`
-   * } */ type,
-  /** @type {string} */ code,
-  /** @type {string} */ lang
-      ) {
+      /**
+       * @param {
+         | 'input'
+         | `output-${'info' | 'log' | 'warn' | 'error'}`
+       * } type
+       * @param {string} code
+       * @param {string} lang
+       */
+      function print(type, code, lang) {
         if (isEmptied) {
           logs.innerHTML = ''
           isEmptied = false
@@ -384,14 +392,33 @@
         iframe.contentWindow.postMessage({ type: 'run', code, lang }, '*')
       }
 
+      function escape(html){
+        const elem = document.createElement('div')
+        elem.appendChild(document.createTextNode(html))
+        return elem.innerHTML
+      }
       // listen iframe messages
       window.addEventListener('message', e => {
-        const { type, method, args } = e.data
+        const { type, method, args: argsStr } = e.data
+        const args = JSON.parse(argsStr ?? '{}')
         if (type === 'console') {
           if (method === 'clear') {
             setLogsIsEmpty()
           } else {
-            print(`output-${method}`, args.map(arg => JSON.stringify(arg)).join(' '), 'javascript')
+            let cacheStr = ''
+            console.log(args)
+            args.forEach(arg => {
+              if (arg.message !== undefined && arg.stack !== undefined) {
+                cacheStr
+                  && print(`output-${method}`, cacheStr, 'javascript')
+                cacheStr = ''
+                print(`output-${method}`, escape(arg.stack), 'text')
+              } else {
+                cacheStr += ' ' + JSON.stringify(arg)
+              }
+            })
+            cacheStr
+              && print(`output-${method}`, cacheStr, 'javascript')
           }
         }
       })
