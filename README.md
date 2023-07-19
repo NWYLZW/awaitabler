@@ -78,10 +78,11 @@ declare module 'awaitabler' {
 const u = await ''`${'https:///users/@me'}`
 //    ^? { id: number, name: string }
 // 我们能够通过这种方式来获取到一个 url 的返回类型，而不需要其他的辅助手段（Type Asseration、JSDoc）
-await ''`${'https:///users/@me'}`
 ```
 
 ### Control Flow
+
+同样我们也定义了一套这样的魔法，用来做控制流的处理。
 
 ```typescript
 await ['u0', 'u1']
