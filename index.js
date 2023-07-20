@@ -24,15 +24,30 @@
     middlewares.push(mid)
     return e.defineMiddleware
   }
+
   e.registerString = function () {
-    Object.defineProperty(String.prototype, 'f', {
-      get() {
-        return fetch(this)
+    window.StringFunction = (str) => {
+      return async (a0, ...args) => {
+        if (Array.isArray(a0)) {
+          // template literals mode
+          // 'url'`${'123'}`
+        } else {
+          // call function mode
+          // 'url'({})
+        }
       }
-    })
-    String.prototype.then = function (on0, on1) {
-      return fetch(this).then(on0, on1)
     }
+    String.prototype.then = /** @type {String['then']} */ (function (on0, on1) {
+      return fetch(this.toString()).then(on0, on1)
+    })
+  }
+
+  e.supportFetch = function () {
+    e.defineMiddleware((ctx, next) => {
+      if (['http', 'https'].includes(ctx.schema)) {
+      }
+      return next()
+    })
   }
   e.registerAll = function () {
     e.registerString()
