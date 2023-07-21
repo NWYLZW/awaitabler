@@ -1,0 +1,34 @@
+import { build, BuildOptions } from 'esbuild'
+
+const common: BuildOptions = {
+  entryPoints: ['src/index.ts'],
+
+  bundle: true,
+  sourcemap: true,
+  target: 'es2019'
+}
+
+const targets: BuildOptions[] = [
+  {
+    platform: 'browser',
+    format: 'iife',
+    outfile: 'src/dist/index.browser.js',
+  },
+  {
+    platform: 'browser',
+    format: 'esm',
+    outfile: 'src/dist/index.browser.mjs',
+  },
+  {
+    platform: 'node',
+    format: 'cjs',
+    outfile: 'src/dist/index.cjs',
+  },
+  {
+    platform: 'node',
+    format: 'esm',
+    outfile: 'src/dist/index.mjs',
+  },
+]
+
+Promise.all(targets.map(t => build({ ...common, ...t })))

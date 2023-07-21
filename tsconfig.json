@@ -1,9 +1,28 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2015",
-    "sourceMap": true
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "awaitabler": ["./src"],
+      "awaitabler/*": ["./src/*"],
+    }
   },
-  "include": ["./index.js", "./index.d.ts", "./global.d.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src", "./playground/src", "scripts/build.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

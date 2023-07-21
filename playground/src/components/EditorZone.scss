@@ -1,0 +1,45 @@
+div.editor-zone {
+  position: relative;
+  max-width: 70vw;
+  height: 100%;
+  > div.menu {
+    width: 100%;
+    height: 53px;
+    background-color: #ffc395;
+    color: #fff;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    > button {
+      padding: 0 20px;
+      height: 100%;
+      background-color: #0000;
+      color: #fff;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-size: 1.5em;
+      font-weight: bold;
+      transition: .3s;
+      &:hover { background-color: #0002; }
+    }
+  }
+  > section > div {
+    width: 680px;
+    min-width: 412px !important;
+    max-width: 100%;
+    height: calc(100% - 53px) !important;
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      background-color: #ec8331;
+      cursor: ew-resize;
+      transition: .3s;
+    }
+  }
+}

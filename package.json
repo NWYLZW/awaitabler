@@ -1,32 +1,20 @@
 {
-  "name": "awaitabler",
-  "version": "0.1.0",
-  "description": "Awaited.",
-  "main": "index.js",
-  "files": [
-    "index.js",
-    "index.d.ts",
-    "await-auto-box.js"
+  "name": "@awaitabler/workspace",
+  "private": true,
+  "workspaces": [
+    "src",
+    "playground"
   ],
-  "exports": {
-    ".": {
-      "types": "./index.d.ts",
-      "require": "./index.js"
-    },
-    "./await-auto-box": "./await-auto-box.js"
-  },
   "scripts": {
+    "playground": "yarn workspace playground",
+    "playground:dev": "yarn playground dev",
+    "build": "node -r esbuild-register ./scripts/build.ts"
   },
-  "keywords": [
-    "Promise",
-    "await",
-    "awaitable",
-    "request",
-    "fetch"
-  ],
   "author": "YiJie <yijie4188@gmail.com>",
   "devDependencies": {
+    "esbuild": "^0.18.14",
+    "esbuild-register": "^3.4.2",
     "typescript": "^5.1.6"
   },
-  "license": "MIT"
+  "packageManager": "yarn@1.22.17"
 }

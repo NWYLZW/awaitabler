@@ -1,0 +1,28 @@
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#root > header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1em 6em;
+  background-color: #ec8331;
+  color: #fff;
+}
+
+#root > div.main {
+  display: flex;
+  flex-grow: 1;
+  height: 0;
+  > iframe.eval-logs {
+    position: relative;
+    flex-grow: 1;
+    min-width: 300px;
+    overflow-y: auto;
+  }
+}

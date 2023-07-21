@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Eval Logs</title>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="/await-auto-box.js"></script>
+  <script type="module">
+    import Awaitabler from 'awaitabler'
+    Awaitabler.registerAll()
+    window.Babel.registerPlugin('await-auto-box', awaitAutoBox)
+  </script>
+  <script>
+    window.addEventListener('message', e => {
+      const { type, code, lang } = e.data
+      /** @type {string} */
+      let runCode
+      if (type === 'run') {
+        switch (lang) {
+          case 'javascript': {
+            const { code: transformCode } = Babel.transform(code, {
+              presets: ['es2015'],
+              plugins: ['await-auto-box']
+            })
+            runCode = transformCode
+            break
+          }
+        }
+      }
+      try {
+        eval(runCode)
+      } catch (e) {
+        console.error(e)
+      }
+    })
+    localStorage.setItem('chii-embedded-height', 10000)
+    localStorage.setItem('panel-selectedTab', '"console"')
+    localStorage.setItem('console.sidebarSelectedFilter', 'message')
+  </script>
+  <script src="/target.js" embedded="true"></script>
+  <style type="text/css">
+    html, body { margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+</body>
+</html>
