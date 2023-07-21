@@ -8,7 +8,7 @@ import { expect } from 'chai'
 
 describe('Await Auto Box', function () {
   it('should transform right by Babel.', () => {
-    const cases = ['common', 'callable']
+    const cases = ['common', 'callable', 'await_with_arguments']
     for (const caseName of cases) {
       const fileContent = fs
         .readFileSync(path.resolve(__dirname,

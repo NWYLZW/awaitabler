@@ -12,17 +12,54 @@ export const awaitAutoBox = declare(({ types: t }) => {
       argument.type === 'StringLiteral'
       || argument.type === 'TemplateLiteral'
     ) {
-      if (path.parent.type === 'SequenceExpression') {
-        const [expr0, expr1] = path.parent.expressions
-        if (expr0.type === 'AwaitExpression' && expr1.type === 'ObjectExpression') {
+      let shouldSequenceExpression = false
+      checkShouldSequenceExpression: if (path.parent.type === 'SequenceExpression') {
+        const [expr0, ...rest] = path.parent.expressions
+
+        if (expr0.type !== 'AwaitExpression') break checkShouldSequenceExpression
+        const lastExpr = rest[rest.length - 1]
+        // the last expression of sequence expression should be a string literal or object expression
+        if (!['ObjectExpression', 'StringLiteral'].includes(lastExpr.type))
+          break checkShouldSequenceExpression
+        const stringLiterals = [expr0.argument]
+        const configureExpression = lastExpr.type === 'ObjectExpression'
+          ? lastExpr
+          : undefined
+        for (const expr of rest) {
+          if (expr.type !== 'StringLiteral') {
+            if (expr === lastExpr && expr.type === 'ObjectExpression') break
+            break checkShouldSequenceExpression
+          }
+          stringLiterals.push(expr)
+        }
+        shouldSequenceExpression = true
+        const stringBinaryExpression = stringLiterals.reduce((prev, cur) => {
+          return t.binaryExpression('+',
+            prev,
+            t.binaryExpression('+',
+              t.stringLiteral(' '),
+              cur
+            )
+          )
+        })
+
+        if (configureExpression) {
           path.parentPath.replaceWith(t.awaitExpression(
             t.callExpression(
-              t.callExpression(t.identifier('StringFunction'), [expr0.argument]),
-              [expr1]
+              t.callExpression(t.identifier('StringFunction'), [stringBinaryExpression]),
+              [configureExpression]
+            )
+          ))
+        } else {
+          path.parentPath.replaceWith(t.awaitExpression(
+            t.callExpression(
+              t.callExpression(t.identifier('StringFunction'), [stringBinaryExpression]),
+              []
             )
           ))
         }
-      } else {
+      }
+      if (!shouldSequenceExpression) {
         path.replaceWith(t.awaitExpression(
           t.newExpression(t.identifier('String'), [argument]),
         ))
