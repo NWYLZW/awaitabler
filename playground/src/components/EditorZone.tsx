@@ -24,6 +24,15 @@ async function main() {
 main()
 `
 
+function copyToClipboard(text: string) {
+  const input = document.createElement('input')
+  input.value = text
+  document.body.appendChild(input)
+  input.select()
+  document.execCommand('copy')
+  document.body.removeChild(input)
+}
+
 function addCommands(editor: monaco.editor.IStandaloneCodeEditor) {
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
     location.hash = `#${btoa(encodeURIComponent(editor.getValue()))}`
