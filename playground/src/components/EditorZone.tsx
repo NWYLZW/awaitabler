@@ -12,11 +12,13 @@ const EXAMPLE_CODE = `// try it, press \`(Ctrl|Cmd) + E\` to run
 import Awaitabler from 'awaitabler'
 
 Awaitabler.registerAll()
+Awaitabler.supportRequest()
 
 async function main() {
     const resp = /** @type {Response} */ (
         await 'https://jsonplaceholder.typicode.com/todos/1'
     )
+    console.log(resp)
     console.log(resp.status)
     console.log(await resp.json())
 }
