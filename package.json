@@ -6,6 +6,7 @@
     "playground"
   ],
   "scripts": {
+    "src": "yarn workspace awaitabler",
     "playground": "yarn workspace playground",
     "playground:dev": "yarn playground dev",
     "build": "node -r esbuild-register ./scripts/build.ts"
