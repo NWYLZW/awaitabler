@@ -29,7 +29,7 @@ export interface Context {
   cmd: string
 }
 export interface Middleware {
-  (ctx: Context, next: () => Promise<unknown>): unknown | Promise<unknown>
+  (ctx: Context, next: () => Promise<void>): unknown | Promise<unknown>
 }
 export function defineMiddleware(mid: Middleware) {
   middlewares.add(mid)
@@ -39,9 +39,12 @@ export async function consumeMiddlewares(ctx: Context) {
   let res: unknown
   let doNext = false
   for (const mid of middlewares) {
-    res = mid(ctx, async () => {
+    res = await mid(ctx, async () => {
       doNext = true
     })
+    if (res === undefined) {
+      doNext = true
+    }
     if (doNext) {
       doNext = false
     } else {
