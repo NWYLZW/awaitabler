@@ -58,6 +58,10 @@ await 'https://jsonplaceholder.typicode.com/todos/1', {
 }
 await '[GET]', 'https://jsonplaceholder.typicode.com/todos/1'
 await '[../]', 'shell:ls -l'
+// 省略 `schema:`
+await '[POST]', '///login', {
+  name: 'admin', password: 'admin',
+}
 ```
 
 ### String Template Literals
