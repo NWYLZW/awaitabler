@@ -14,5 +14,8 @@ export default defineConfig({
         'eval-logs': path.resolve(__dirname, 'eval-logs.html')
       }
     }
+  },
+  define: {
+    MODE: '"esm"'
   }
 })
