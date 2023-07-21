@@ -117,7 +117,7 @@ export default function EditorZone() {
         if (code === '' || code === undefined) return
 
         run(code, 'javascript')
-      }}>Excute</button>
+      }}>Execute</button>
     </div>
     <Editor
       language='javascript'
