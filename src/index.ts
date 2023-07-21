@@ -29,11 +29,26 @@ export interface Context {
   cmd: string
 }
 export interface Middleware {
-  (ctx: Context, next: () => Promise<void>): void | Promise<void>
+  (ctx: Context, next: () => Promise<unknown>): unknown | Promise<unknown>
 }
 export function defineMiddleware(mid: Middleware) {
   middlewares.add(mid)
   return () => middlewares.delete(mid)
+}
+export async function consumeMiddlewares(ctx: Context) {
+  let res: unknown
+  let doNext = false
+  for (const mid of middlewares) {
+    res = mid(ctx, async () => {
+      doNext = true
+    })
+    if (doNext) {
+      doNext = false
+    } else {
+      break
+    }
+  }
+  return res
 }
 
 export function supportRequest() {
@@ -108,11 +123,11 @@ export function registerString() {
       }
     }) as StringFunction
   }
-  String.prototype.then = /** @type {String['then']} */ (function (on0, on1) {
-    const tags: string[] = []
-    const str = this.toString()
-    return fetch(str).then(on0, on1)
-  })
+  String.prototype.then = function (on0, on1) {
+    return consumeMiddlewares(
+      resolveContext(this.toString())
+    ).then(on0, on1)
+  }
 }
 
 export function registerAll() {
