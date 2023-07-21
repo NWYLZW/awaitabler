@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <title>Eval Logs</title>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="/await-auto-box.js"></script>
   <script type="module">
     import Awaitabler from 'awaitabler'
+    import awaitAutoBox from 'awaitabler/await-auto-box'
     Awaitabler.registerAll()
-    window.Babel.registerPlugin('await-auto-box', awaitAutoBox)
+    Babel.registerPlugin('await-auto-box', awaitAutoBox)
   </script>
   <script>
     window.addEventListener('message', e => {

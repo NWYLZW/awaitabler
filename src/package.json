@@ -28,5 +28,9 @@
     "fetch"
   ],
   "author": "YiJie <yijie4188@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/helper-plugin-utils": "^7.22.5",
+    "@types/babel__helper-plugin-utils": "^7.10.0"
+  }
 }
