@@ -22,4 +22,9 @@ describe('Await Auto Box', function () {
       expect(code).to.equal(outputFileContent)
     }
   })
+  it('test', () => {
+    console.log(
+      transformSync("await ['u0', 'u1']", { plugins: [awaitAutoBox] }).code
+    )
+  })
 })
