@@ -42,7 +42,7 @@ function addCommands(editor: monaco.editor.IStandaloneCodeEditor) {
     const code = editor.getValue().trim()
     if (code === '') return
 
-    runCode(code, 'javascript')
+    dododo(code, 'javascript')
   })
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow, function () {
     // 当光标位于第一行时触发
@@ -126,7 +126,7 @@ export default function EditorZone() {
         const code = editorRef.current?.getValue().trim()
         if (code === '' || code === undefined) return
 
-        runCode(code, 'javascript')
+        dododo(code, 'javascript')
       }}>Execute</button>
     </div>
     <Editor
