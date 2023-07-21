@@ -1,5 +1,5 @@
 import { describe } from 'mocha'
-import { resolveContext } from 'awaitabler'
+import { resolveContext, setConfigure } from 'awaitabler'
 import { expect } from 'chai'
 
 describe('resolveContext', () => {
@@ -39,10 +39,17 @@ describe('resolveContext', () => {
     ctx4.property('tags').that.includes('t      a       g0')
   })
   it('should resolve no schema.', () => {
-    const ctx = expect(resolveContext(':cmd'))
-    ctx.have.property('schema', 'http')
-    ctx.have.property('target', 'http:cmd')
-    ctx.have.property('cmd', 'cmd')
-    ctx.have.property('tags').with.lengthOf(0)
+    const ctx0 = expect(resolveContext(':cmd'))
+    ctx0.have.property('schema', 'http')
+    ctx0.have.property('target', 'http:cmd')
+    ctx0.have.property('cmd', 'cmd')
+    ctx0.have.property('tags').with.lengthOf(0)
+
+    setConfigure({ defaultSchema: 'https' })
+    const ctx1 = expect(resolveContext(':cmd'))
+    ctx1.have.property('schema', 'https')
+    ctx1.have.property('target', 'https:cmd')
+    ctx1.have.property('cmd', 'cmd')
+    ctx1.have.property('tags').with.lengthOf(0)
   })
 })

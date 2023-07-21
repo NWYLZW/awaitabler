@@ -44,6 +44,8 @@ export function supportRequest() {
   })
 }
 
+export { setConfigure } from './configure'
+
 /**
  * await string EBNF
  * ```EBNF
