@@ -1,6 +1,6 @@
 import './EditorZone.scss'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as monaco from 'monaco-editor'
 
 import Editor from '@monaco-editor/react'
@@ -9,6 +9,10 @@ const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
 
 const EXAMPLE_CODE = `// try it, press \`(Ctrl|Cmd) + E\` to run
+import Awaitabler from 'awaitabler'
+
+Awaitabler.registerAll()
+
 async function main() {
     const resp = /** @type {Response} */ (
         await 'https://jsonplaceholder.typicode.com/todos/1'
@@ -41,6 +45,8 @@ function addCommands(editor: monaco.editor.IStandaloneCodeEditor) {
 }
 
 export default function EditorZone() {
+  const hash = location.hash.slice(1)
+  const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : EXAMPLE_CODE)
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>(null)
   const effectFuncs = useRef<Function[]>([])
   useEffect(() => {
@@ -116,7 +122,8 @@ export default function EditorZone() {
     <Editor
       language='javascript'
       options={{ automaticLayout: true }}
-      defaultValue={EXAMPLE_CODE}
+      value={code}
+      onChange={e => setCode(e ?? '')}
       onMount={editor => {
         // @ts-ignore
         editorRef.current = editor
