@@ -4,7 +4,7 @@ declare global {
   /**
    * run code in iframe
    */
-  export function run(code: string, lang: string): void
+  export function runCode(code: string, lang: string): void
 }
 
 export {}

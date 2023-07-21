@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-window.run = function run(code, lang) {
+window.runCode = function runCode(code, lang) {
   document.querySelector<HTMLIFrameElement>('iframe.eval-logs')
     ?.contentWindow
     ?.postMessage({ type: 'run', code, lang }, '*')
