@@ -84,7 +84,8 @@ export default function EditorZone() {
                   const newWidth = (parseInt(getComputedStyle(el, '').width) + dx)
 
                   mPos = e.x
-                  el.style.width = newWidth + 'px'
+                  // set width with !important
+                  el.style.setProperty('width', newWidth + 'px', 'important')
                   el.style.minWidth = '5px'
                 }
                 function elMouseDown(e: MouseEvent) {
@@ -130,7 +131,14 @@ export default function EditorZone() {
     </div>
     <Editor
       language='javascript'
-      options={{ automaticLayout: true }}
+      options={{
+        automaticLayout: true,
+        scrollbar: {
+          vertical: 'hidden',
+          verticalSliderSize: 0,
+          verticalScrollbarSize: 0,
+        }
+      }}
       value={code}
       onChange={e => setCode(e ?? '')}
       onMount={editor => {
