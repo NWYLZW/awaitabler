@@ -12,9 +12,21 @@ export const awaitAutoBox = declare(({ types: t }) => {
       argument.type === 'StringLiteral'
       || argument.type === 'TemplateLiteral'
     ) {
-      path.replaceWith(t.awaitExpression(
-        t.newExpression(t.identifier('String'), [argument]),
-      ))
+      if (path.parent.type === 'SequenceExpression') {
+        const [expr0, expr1] = path.parent.expressions
+        if (expr0.type === 'AwaitExpression' && expr1.type === 'ObjectExpression') {
+          path.parentPath.replaceWith(t.awaitExpression(
+            t.callExpression(
+              t.callExpression(t.identifier('StringFunction'), [expr0.argument]),
+              [expr1]
+            )
+          ))
+        }
+      } else {
+        path.replaceWith(t.awaitExpression(
+          t.newExpression(t.identifier('String'), [argument]),
+        ))
+      }
     }
     if (
       argument.type === 'CallExpression'
