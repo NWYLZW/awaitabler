@@ -67,8 +67,8 @@ export function supportRequest() {
 export function resolveContext(str: string) {
   const ctx: Context = {
     tags: [],
-    schema: configure.defaultSchema,
-    target: `${configure.defaultSchema}:`,
+    schema: '',
+    target: '',
     cmd: ''
   }
   let cache = ''
@@ -83,7 +83,7 @@ export function resolveContext(str: string) {
         ctx.tags.push(tag)
         break
       case ':':
-        ctx.schema = cache.trim()
+        ctx.schema = cache.trim() || configure.defaultSchema
         ctx.cmd = str.slice(i + 1)
         ctx.target = `${ctx.schema}:${ctx.cmd}`
         return ctx

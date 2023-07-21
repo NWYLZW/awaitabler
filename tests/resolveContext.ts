@@ -38,4 +38,11 @@ describe('resolveContext', () => {
     ctx4.have.property('tags').with.lengthOf(1)
     ctx4.property('tags').that.includes('t      a       g0')
   })
+  it('should resolve no schema.', () => {
+    const ctx = expect(resolveContext(':cmd'))
+    ctx.have.property('schema', 'http')
+    ctx.have.property('target', 'http:cmd')
+    ctx.have.property('cmd', 'cmd')
+    ctx.have.property('tags').with.lengthOf(0)
+  })
 })
