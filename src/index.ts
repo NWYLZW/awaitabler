@@ -71,27 +71,24 @@ export function resolveContext(str: string) {
     target: `${configure.defaultSchema}:`,
     cmd: ''
   }
-  let spaceCount = 0
-  let prevPushTagEnd = 0
+  let cache = ''
   for (let i = 0; i < str.length; i++) {
-    if (str[i] === ' ') {
-      spaceCount++
-    }
-    if (str[i] === '[') {
-      const tag = []
-      while (str[i + 1] !== ']') {
-        i++
-        tag.push(str[i])
-      }
-      ctx.tags.push(tag.join(''))
-      spaceCount = 0
-      prevPushTagEnd = i + 2
-    } else if (str[i] === ':') {
-      const start = prevPushTagEnd + spaceCount
-      ctx.schema = str.slice(start, i)
-      ctx.target = str.slice(start)
-      ctx.cmd = str.slice(i + 1)
-      break
+    const c = str[i]
+    switch (c) {
+      case '[':
+        let tag = ''
+        while (str[++i] !== ']') {
+          tag += str[i]
+        }
+        ctx.tags.push(tag)
+        break
+      case ':':
+        ctx.schema = cache.trim()
+        ctx.cmd = str.slice(i + 1)
+        ctx.target = `${ctx.schema}:${ctx.cmd}`
+        return ctx
+      default:
+        cache += c
     }
   }
   return ctx

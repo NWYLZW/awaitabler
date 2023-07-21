@@ -30,5 +30,12 @@ describe('resolveContext', () => {
     ctx3.have.property('cmd', 'cmd')
     ctx3.have.property('tags').with.lengthOf(2)
     ctx3.property('tags').that.eqls(['tag0', 'tag1'])
+
+    const ctx4 = expect(resolveContext('[t      a       g0]sche     ma4:cmd'))
+    ctx4.have.property('schema', 'sche     ma4')
+    ctx4.have.property('target', 'sche     ma4:cmd')
+    ctx4.have.property('cmd', 'cmd')
+    ctx4.have.property('tags').with.lengthOf(1)
+    ctx4.property('tags').that.includes('t      a       g0')
   })
 })
