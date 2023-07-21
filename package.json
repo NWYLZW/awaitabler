@@ -16,6 +16,7 @@
     "@babel/core": "^7.22.9",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
+    "@types/node": "^20.4.2",
     "chai": "^4.3.7",
     "esbuild": "^0.18.14",
     "esbuild-register": "^3.4.2",
