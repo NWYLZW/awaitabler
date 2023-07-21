@@ -47,7 +47,7 @@ export function supportRequest() {
 /**
  * await string EBNF
  * ```EBNF
- * tag = '[' , { all characters - '] ' } , '] ' ;
+ * tag = '[' , { all characters - ']' } , ']', [ { ' ' } ] ;
  * schema = { all characters - ':' } , ':' ;
  * target = schema , { all characters } ;
  * await string rule = { tag } , target ;
@@ -62,6 +62,7 @@ export function supportRequest() {
  * more examples:
  * [../] shell:ls -l
  * [.../] fs://./url/to/file
+ * ://www.com
  */
 export function resolveContext(str: string) {
   const ctx: Context = {
@@ -70,17 +71,26 @@ export function resolveContext(str: string) {
     target: `${configure.defaultSchema}:`,
     cmd: ''
   }
+  let spaceCount = 0
+  let prevPushTagEnd = 0
   for (let i = 0; i < str.length; i++) {
+    if (str[i] === ' ') {
+      spaceCount++
+    }
     if (str[i] === '[') {
       const tag = []
-      while (str[i] !== ']') {
-        tag.push(str[i])
+      while (str[i + 1] !== ']') {
         i++
+        tag.push(str[i])
       }
       ctx.tags.push(tag.join(''))
+      spaceCount = 0
+      prevPushTagEnd = i + 2
     } else if (str[i] === ':') {
-      ctx.schema = str.slice(0, i)
-      ctx.target = str.slice(i + 1)
+      const start = prevPushTagEnd + spaceCount
+      ctx.schema = str.slice(start, i)
+      ctx.target = str.slice(start)
+      ctx.cmd = str.slice(i + 1)
       break
     }
   }
