@@ -8,12 +8,13 @@ import Editor from '@monaco-editor/react'
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
 
-const EXAMPLE_CODE = `// try it, press \`(Ctrl|Cmd) + Enter\` to run
+const EXAMPLE_CODE = `// try it, press \`(Ctrl|Cmd) + E\` to run
 async function main() {
     const resp = /** @type {Response} */ (
         await 'https://jsonplaceholder.typicode.com/todos/1'
     )
-    console.log(resp.status, resp.statusText)
+    console.log(resp.status)
+    console.log(await resp.json())
 }
 
 main()
