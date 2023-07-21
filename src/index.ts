@@ -57,6 +57,7 @@ export async function consumeMiddlewares(ctx: Context) {
 export function supportRequest() {
   defineMiddleware((ctx, next) => {
     if (['http', 'https'].includes(ctx.schema)) {
+      return fetch(ctx.target)
     }
     return next()
   })
