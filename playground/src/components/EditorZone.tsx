@@ -37,8 +37,9 @@ function copyToClipboard(text: string) {
 
 function addCommands(editor: monaco.editor.IStandaloneCodeEditor) {
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-    location.hash = `#${btoa(encodeURIComponent(editor.getValue()))}`
+    history.pushState(null, '', '#' + btoa(encodeURIComponent(editor.getValue())))
     copyToClipboard(location.href)
+    editor.focus()
   })
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE, function () {
     const code = editor.getValue().trim()
