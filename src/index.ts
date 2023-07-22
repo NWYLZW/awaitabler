@@ -45,10 +45,7 @@ export async function consumeMiddlewares(ctx: Context) {
   const next = async (): Promise<unknown> => {
     const mid = middlewareValues.next().value
     if (mid) {
-      const res = await mid(ctx, next)
-      if (res) return res
-
-      return next()
+      return await mid(ctx, next) ?? await next()
     }
   }
   return next()
