@@ -20,9 +20,10 @@
 
     "paths": {
       "awaitabler": ["./src"],
-      "awaitabler/*": ["./src/*"],
+      "awaitabler/*": ["./src/*"]
     }
   },
   "include": ["src", "./playground/src", "scripts/build.ts"],
+  "exclude": ["src/dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
