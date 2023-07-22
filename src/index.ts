@@ -3,6 +3,8 @@ import { configure } from './configure'
 
 export default Self
 
+export * from './quester'
+
 declare global {
   export interface StringFunction {
     <T extends Record<string, unknown>>(config: T): Promise<T>
@@ -32,6 +34,9 @@ export interface Middleware {
   (ctx: Context, next: () => Promise<void>): unknown | Promise<unknown>
 }
 export function defineMiddleware(mid: Middleware) {
+  return mid
+}
+export function use(mid: Middleware) {
   middlewares.add(mid)
   return () => middlewares.delete(mid)
 }
@@ -52,15 +57,6 @@ export async function consumeMiddlewares(ctx: Context) {
     }
   }
   return res
-}
-
-export function supportRequest() {
-  defineMiddleware((ctx, next) => {
-    if (['http', 'https'].includes(ctx.schema)) {
-      return fetch(ctx.target)
-    }
-    return next()
-  })
 }
 
 export { setConfigure } from './configure'
