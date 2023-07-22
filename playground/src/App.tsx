@@ -1,9 +1,7 @@
 import './App.scss'
 
-import Awaitabler from 'awaitabler'
 import EditorZone from './components/EditorZone'
-
-Awaitabler.registerAll()
+import { ThemeSwitcher } from './components/ThemeSwitcher.tsx'
 
 function App() {
   return (
@@ -17,6 +15,7 @@ function App() {
             Awaitabler
           </a>
         </h1>
+        <ThemeSwitcher/>
       </header>
       <div className='main'>
         <EditorZone />

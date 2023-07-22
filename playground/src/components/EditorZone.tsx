@@ -54,6 +54,9 @@ function addCommands(editor: monaco.editor.IStandaloneCodeEditor) {
     // 当光标位于最后一行时触发
   })
   editor.focus()
+  onThemeChange(theme => editor.updateOptions({
+    theme: theme === 'light' ? 'vs' : 'vs-dark'
+  }))
 }
 
 export default function EditorZone() {

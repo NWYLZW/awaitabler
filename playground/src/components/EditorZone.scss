@@ -5,12 +5,13 @@ div.editor-zone {
   > div.menu {
     width: 100%;
     height: 53px;
-    background-color: #ffc395;
+    background-color: color-mix(in srgb, var(--primary) 50%, #fff);
     color: #fff;
     display: flex;
     flex-direction: row;
     align-items: center;
     box-sizing: border-box;
+    transition: .1s;
     > button {
       padding: 0 20px;
       height: 100%;
@@ -37,7 +38,7 @@ div.editor-zone {
       right: 0;
       width: 4px;
       height: 100%;
-      background-color: #ec8331;
+      background-color: var(--primary);
       cursor: ew-resize;
       transition: .3s;
     }
