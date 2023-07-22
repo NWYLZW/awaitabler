@@ -81,4 +81,16 @@ describe('Middleware', () => {
     mid0()
     mid1()
   })
+  it('should inject next return value.', async () => {
+    const mid0 = use(async (ctx, next) => {
+      const nextValue = await next()
+      return nextValue + 'mid0'
+    })
+    const mid1 = use((ctx, next) => {
+      return 'mid1'
+    })
+    expect(await consumeMiddlewares(<Context>{ tags: [] })).to.equal('mid1mid0')
+    mid0()
+    mid1()
+  })
 })
