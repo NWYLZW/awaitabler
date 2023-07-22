@@ -68,9 +68,13 @@ export default function EditorZone() {
     }
   }, [])
 
-  useEffect(() => onThemeChange(theme => editorRef.current?.updateOptions({
-    theme: theme === 'light' ? 'vs' : 'vs-dark'
-  })), [])
+  let innerTheme = 'light'
+  useEffect(() => onThemeChange(theme => {
+    editorRef.current?.updateOptions({
+      theme: theme === 'light' ? 'vs' : 'vs-dark'
+    })
+    innerTheme = theme
+  }), [])
   return <div className='editor-zone'
               ref={async ele => {
                 // wait monaco editor mount
@@ -151,6 +155,9 @@ export default function EditorZone() {
         // @ts-ignore
         editorRef.current = editor
         addCommands(editor)
+        editorRef.current?.updateOptions({
+          theme: innerTheme === 'light' ? 'vs' : 'vs-dark'
+        })
       }}
     />
   </div>
