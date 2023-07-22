@@ -140,6 +140,7 @@ export default function EditorZone() {
       }}>Execute</button>
     </div>
     <Editor
+      // TODO support switch typescript
       language='javascript'
       options={{
         automaticLayout: true,
@@ -150,13 +151,22 @@ export default function EditorZone() {
         }
       }}
       value={code}
+      path='file:///index.js'
       onChange={e => setCode(e ?? '')}
-      onMount={editor => {
+      onMount={(editor, monaco) => {
         // @ts-ignore
         editorRef.current = editor
         addCommands(editor)
         editorRef.current?.updateOptions({
           theme: innerTheme === 'light' ? 'vs' : 'vs-dark'
+        })
+        // @ts-ignore
+        const dtsFiles = MONACO_DTS_FILES as { content: string, filePath: string }[]
+        const typescriptDefaults = monaco.languages.typescript.typescriptDefaults
+        const javascriptDefaults = monaco.languages.typescript.javascriptDefaults
+        dtsFiles.forEach(({ content, filePath }) => {
+          typescriptDefaults.addExtraLib(content, filePath)
+          javascriptDefaults.addExtraLib(content, filePath)
         })
       }}
     />
