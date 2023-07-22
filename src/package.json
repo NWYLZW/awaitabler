@@ -20,6 +20,9 @@
       "./await-auto-box": "./await-auto-box.js"
     }
   },
+  "scripts": {
+    "build:dts": "tsc --emitDeclarationOnly --noEmit false --declaration --outDir dist"
+  },
   "keywords": [
     "Promise",
     "await",
