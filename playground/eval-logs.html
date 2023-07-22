@@ -19,34 +19,40 @@
     /** @type {Function} */
     let prevDisposeFunc
     window.addEventListener('message', e => {
-      const { type, code, lang } = e.data
-
-      if (type === 'run') {
-        /** @type {string} */
-        let runCode
-        switch (lang) {
-          case 'javascript': {
-            const { code: transformCode } = Babel.transform(code, {
-              presets: ['es2015'],
-              plugins: ['await-auto-box']
-            })
-            runCode = transformCode
-            break
+      switch (e.data.type) {
+        case 'run': {
+          const { code, lang } = e.data
+          /** @type {string} */
+          let runCode
+          switch (lang) {
+            case 'javascript': {
+              const { code: transformCode } = Babel.transform(code, {
+                presets: ['es2015'],
+                plugins: ['await-auto-box']
+              })
+              runCode = transformCode
+              break
+            }
           }
-        }
-        try {
-          const getExportsRunCode = `
+          try {
+            const getExportsRunCode = `
 (function () {
   const module = { exports: {} };
   const exports = module.exports;
   ${runCode};
   return module.exports
 })()`.trim()
-          prevDisposeFunc?.()
-          const { dispose } = eval(getExportsRunCode)
-          prevDisposeFunc = dispose
-        } catch (e) {
-          console.error(e)
+            prevDisposeFunc?.()
+            const { dispose } = eval(getExportsRunCode)
+            prevDisposeFunc = dispose
+          } catch (e) {
+            console.error(e)
+          }
+          break
+        }
+        case 'update:localStorage': {
+          const { key, data } = e.data
+          localStorage.setItem(key, JSON.stringify(data))
         }
       }
     })
