@@ -20,11 +20,10 @@
     let prevDisposeFunc
     window.addEventListener('message', e => {
       const { type, code, lang } = e.data
-      if (type !== 'run') return
 
-      /** @type {string} */
-      let runCode
       if (type === 'run') {
+        /** @type {string} */
+        let runCode
         switch (lang) {
           case 'javascript': {
             const { code: transformCode } = Babel.transform(code, {
@@ -35,20 +34,20 @@
             break
           }
         }
-      }
-      try {
-        const getExportsRunCode = `
+        try {
+          const getExportsRunCode = `
 (function () {
   const module = { exports: {} };
   const exports = module.exports;
   ${runCode};
   return module.exports
 })()`.trim()
-        prevDisposeFunc?.()
-        const { dispose } = eval(getExportsRunCode)
-        prevDisposeFunc = dispose
-      } catch (e) {
-        console.error(e)
+          prevDisposeFunc?.()
+          const { dispose } = eval(getExportsRunCode)
+          prevDisposeFunc = dispose
+        } catch (e) {
+          console.error(e)
+        }
       }
     })
     localStorage.setItem('chii-embedded-height', 10000)
