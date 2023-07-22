@@ -99,6 +99,13 @@ await ['u0' && 'u1']
 // [await 'u0', await 'u1']
 await ('u0' && 'u1')
 // (await 'u0', await 'u1')
+
+for await (const message of 'ws://localhost:8080') {
+    console.log(message)
+}
+for await (const buffer of 'https://stream.com') {
+    console.log(message)
+}
 ```
 
 ### Using
