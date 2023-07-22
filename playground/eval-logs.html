@@ -16,8 +16,12 @@
     }
   </script>
   <script>
+    /** @type {Function} */
+    let prevDisposeFunc
     window.addEventListener('message', e => {
       const { type, code, lang } = e.data
+      if (type !== 'run') return
+
       /** @type {string} */
       let runCode
       if (type === 'run') {
@@ -33,7 +37,16 @@
         }
       }
       try {
-        eval(runCode)
+        const getExportsRunCode = `
+(function () {
+  const module = { exports: {} };
+  const exports = module.exports;
+  ${runCode};
+  return module.exports
+})()`.trim()
+        prevDisposeFunc?.()
+        const { dispose } = eval(getExportsRunCode)
+        prevDisposeFunc = dispose
       } catch (e) {
         console.error(e)
       }
