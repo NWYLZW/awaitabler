@@ -1,4 +1,4 @@
-import { defineMiddleware, consumeMiddlewares, Context } from 'awaitabler'
+import { consumeMiddlewares, Context, use } from 'awaitabler'
 import { expect } from 'chai'
 
 describe('Middleware', () => {
@@ -6,11 +6,11 @@ describe('Middleware', () => {
     const ctx = {
       tags: ['tag0', 'tag1']
     }
-    const mid0 = defineMiddleware((ctx, next) => {
+    const mid0 = use((ctx, next) => {
       ctx.tags.push('mid0')
       return next()
     })
-    const mid1 = defineMiddleware((ctx, next) => {
+    const mid1 = use((ctx, next) => {
       ctx.tags.push('mid1')
       return next()
     })
@@ -20,13 +20,13 @@ describe('Middleware', () => {
     mid1()
   })
   it('should consume middlewares by condition.', async () => {
-    const mid0 = defineMiddleware((ctx, next) => {
+    const mid0 = use((ctx, next) => {
       if (ctx.tags.includes('tag0')) {
         ctx.tags.push('mid0')
       }
       return next()
     })
-    const mid1 = defineMiddleware((ctx, next) => {
+    const mid1 = use((ctx, next) => {
       if (ctx.tags.includes('tag1')) {
         ctx.tags.push('mid1')
       }
@@ -45,13 +45,13 @@ describe('Middleware', () => {
     mid1()
   })
   it('should consume middlewares with return value.', async () => {
-    const mid0 = defineMiddleware((ctx, next) => {
+    const mid0 = use((ctx, next) => {
       if (ctx.tags.includes('tag0')) {
         return 'mid0'
       }
       return next()
     })
-    const mid1 = defineMiddleware((ctx, next) => {
+    const mid1 = use((ctx, next) => {
       if (ctx.tags.includes('tag1')) {
         return 'mid1'
       }
@@ -63,16 +63,15 @@ describe('Middleware', () => {
     mid1()
   })
   it('should do next middleware when return value is undefined.', async () => {
-    const mid0 = defineMiddleware((ctx, next) => {
+    const mid0 = use(ctx => {
       if (ctx.tags.includes('tag0')) {
         return
       }
       return 'mid0'
     })
-    const mid1 = defineMiddleware((ctx, next) => {
+    const mid1 = use(() => {
       return 'mid1'
     })
-    const ctx = <Context>{ tags: ['tag0'] }
     expect(await consumeMiddlewares(<Context>{
       tags: ['tag0']
     })).to.equal('mid1')

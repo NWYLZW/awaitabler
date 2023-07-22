@@ -41,22 +41,17 @@ export function use(mid: Middleware) {
   return () => middlewares.delete(mid)
 }
 export async function consumeMiddlewares(ctx: Context) {
-  let res: unknown
-  let doNext = false
-  for (const mid of middlewares) {
-    res = await mid(ctx, async () => {
-      doNext = true
-    })
-    if (res === undefined) {
-      doNext = true
-    }
-    if (doNext) {
-      doNext = false
-    } else {
-      break
+  const middlewareValues = middlewares.values()
+  const next = async (): Promise<unknown> => {
+    const mid = middlewareValues.next().value
+    if (mid) {
+      const res = await mid(ctx, next)
+      if (res) return res
+
+      return next()
     }
   }
-  return res
+  return next()
 }
 
 export { setConfigure } from './configure'
