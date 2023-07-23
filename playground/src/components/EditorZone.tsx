@@ -1,12 +1,13 @@
 import './EditorZone.scss'
 
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import type * as monacoEditor from 'monaco-editor'
 import Editor, { useMonaco } from '@monaco-editor/react'
 
 import examples from '../examples.ts'
 import Switcher from './Switcher.tsx'
+import { CodeHistoryItem, useCodeHistory } from './EditorZone_CodeHistory.ts'
 
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
@@ -28,12 +29,15 @@ function copyToClipboard(text: string) {
 
 function addCommands(
   editor: monacoEditor.editor.IStandaloneCodeEditor,
-  monaco: typeof monacoEditor
+  monaco: typeof monacoEditor,
+  addHistory: (code: string) => void,
 ) {
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-    history.pushState(null, '', '#' + btoa(encodeURIComponent(editor.getValue())))
+    const code = editor.getValue()
+    history.pushState(null, '', '#' + btoa(encodeURIComponent(code)))
     copyToClipboard(location.href)
     editor.focus()
+    addHistory(code)
   })
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE, function () {
     const code = editor.getValue().trim()
@@ -91,7 +95,7 @@ export const HelpDialog = forwardRef<DialogRef>(function HelpDialog({ }, ref) {
       document.addEventListener('keyup', handleKeyUp)
       return () => document.removeEventListener('keyup', handleKeyUp)
     }
-  })
+  }, [open])
   return createPortal(<dialog
     className='help'
     autoFocus
@@ -116,6 +120,96 @@ export const HelpDialog = forwardRef<DialogRef>(function HelpDialog({ }, ref) {
       </div>
     </div>
   </dialog>, document.body, 'help-dialog')
+})
+
+export const HistoryDialog = forwardRef<DialogRef, {
+  onChange?: (codeHistory: CodeHistoryItem) => void
+}>(function HistoryDialog({ onChange }, ref) {
+  const [open, setOpen] = useState(false)
+  useImperativeHandle(ref, () => ({
+    open: () => setOpen(true),
+    hide: () => setOpen(false),
+  }), [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // cmd/ctrl + h
+      if (e.key === 'h' && (e.metaKey || e.ctrlKey)) {
+        setOpen(true)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+  useEffect(() => {
+    if (open) {
+      const handleKeyUp = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setOpen(false)
+        // up
+        if (e.key === 'ArrowUp') {
+          setSelected(selected => (selected + historyList.length - 1) % historyList.length)
+        }
+        // down
+        if (e.key === 'ArrowDown') {
+          setSelected(selected => (selected + 1) % historyList.length)
+        }
+        // enter
+        if (e.key === 'Enter') {
+          onChange?.(history)
+          setOpen(false)
+        }
+      }
+      document.addEventListener('keyup', handleKeyUp)
+      return () => document.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [open])
+
+  const [historyList, dispatch] = useCodeHistory()
+  const [selected, setSelected] = useState(0)
+  const history = useMemo(() => historyList[selected], [historyList, selected])
+  return createPortal(<dialog
+    className='history'
+    autoFocus
+    open={open}
+  >
+    <div className='dialog__container'>
+      <div className='dialog__title'>
+        <h5>
+          历史记录
+        </h5>
+        <span><code>↑/↓</code>(选择)</span>
+        <span><code>Enter</code>(确认)</span>
+        <button className='dialog__close' onClick={() => setOpen(false)}>×</button>
+      </div>
+      <div className="dialog__content">
+        <div className='history__list'>
+          {historyList.map((item, index) => (
+            <div
+              className={'history__item'
+                + (index === selected ? ' history__item--selected' : '')}
+              onClick={() => setSelected(index)}
+            >
+              <pre className='history__item__code'>{item.code}</pre>
+              <div className='history__item__time'>{new Date(item.time).toLocaleString()}</div>
+            </div>
+          ))}
+        </div>
+        <div className='preview'>
+          <Editor
+            height='100%'
+            width='100%'
+            language='javascript'
+            value={history?.code ?? ''}
+            options={{
+              readOnly: true,
+              minimap: { enabled: false },
+              scrollbar: { vertical: 'hidden' },
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  </dialog>, document.body, 'history-dialog')
 })
 
 export default function EditorZone() {
@@ -178,6 +272,9 @@ export default function EditorZone() {
   }), [])
 
   const helpDialogRef = useRef<DialogRef>(null)
+  const historyDialogRef = useRef<DialogRef>(null)
+
+  const [, codeHistoryDispatch] = useCodeHistory()
   return <div className='editor-zone'
               ref={async ele => {
                 // wait monaco editor mount
@@ -235,6 +332,10 @@ export default function EditorZone() {
                 })
               }}>
     <HelpDialog ref={helpDialogRef} />
+    <HistoryDialog
+      ref={historyDialogRef}
+      onChange={ch => setCode(ch.code)}
+    />
     <div className='menu'>
       <div className='btns'>
         <button className='excute' onClick={() => {
@@ -243,7 +344,7 @@ export default function EditorZone() {
 
           dododo(code, 'javascript')
         }}>Execute</button>
-        <button className='history'>
+        <button className='history' onClick={() => historyDialogRef.current?.open()}>
           History
         </button>
         <button className='help' onClick={() => helpDialogRef.current?.open()}>
@@ -325,7 +426,7 @@ export default function EditorZone() {
         editorRef.current.updateOptions({
           theme: innerTheme === 'light' ? 'vs' : 'vs-dark'
         })
-        addCommands(editor, monaco)
+        addCommands(editor, monaco, code => codeHistoryDispatch({ type: 'add', code }))
       }}
     />
   </div>
