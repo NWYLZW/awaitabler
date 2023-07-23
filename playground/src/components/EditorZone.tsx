@@ -4,26 +4,12 @@ import { useEffect, useRef, useState } from 'react'
 import type * as monacoEditor from 'monaco-editor'
 import Editor, { useMonaco } from '@monaco-editor/react'
 
+import examples from '../examples.ts'
+
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
 
-const EXAMPLE_CODE = `// try it, press \`(Ctrl|Cmd) + E\` to run
-import Awaitabler from 'awaitabler'
-
-Awaitabler.registerAll()
-Awaitabler.supportRequest()
-
-async function main() {
-    const resp = /** @type {Response} */ (
-        await 'https://jsonplaceholder.typicode.com/todos/1'
-    )
-    console.log(resp)
-    console.log(resp.status)
-    console.log(await resp.json())
-}
-
-main()
-`
+const EXAMPLE_CODE = examples.base.ts
 
 // @ts-ignore
 const extraModules = EXTRA_MODULES as { content: string, filePath: string }[]
