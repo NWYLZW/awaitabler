@@ -76,11 +76,12 @@ export const HelpDialog = forwardRef<DialogRef>(function HelpDialog({ }, ref) {
   }), [])
 
   const isMac = navigator.platform.includes('Mac')
-  const cmdOrCtrl = isMac ? 'Cmd' : 'Ctrl'
+  const cmdOrCtrl = isMac ? '⌘' : 'Ctrl'
+  const ctrl = isMac ? '⌃' : 'Ctrl'
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '?') {
+      if (e.key === '/' && (e.metaKey || e.ctrlKey)) {
         setOpen(true)
       }
     }
@@ -106,11 +107,13 @@ export const HelpDialog = forwardRef<DialogRef>(function HelpDialog({ }, ref) {
         <h1>帮助</h1>
         <button className='dialog__close' onClick={() => setOpen(false)}>×</button>
       </div>
-      <div className="dialog__content">
+      <div className='dialog__content'>
         <h2>快捷键</h2>
         <ul>
           <li><code>{cmdOrCtrl} + S</code>: 保存并复制链接</li>
           <li><code>{cmdOrCtrl} + E</code>: 执行代码</li>
+          <li><code>{cmdOrCtrl} + H</code>: 历史代码（{cmdOrCtrl} + S 保存下来的代码）</li>
+          <li><code>{ctrl} + /</code>: 查看帮助</li>
         </ul>
         <h2>支持的语言</h2>
         <ul>
@@ -186,7 +189,7 @@ export const HistoryDialog = forwardRef<DialogRef, {
         <span><code>Enter</code>(确认)</span>
         <button className='dialog__close' onClick={() => setOpen(false)}>×</button>
       </div>
-      <div className="dialog__content">
+      <div className='dialog__content'>
         <div className='history__list'>
           {historyList.map((item, index) => (
             <div
