@@ -1,6 +1,7 @@
 import './EditorZone.scss'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react'
+import { createPortal } from 'react-dom'
 import type * as monacoEditor from 'monaco-editor'
 import Editor, { useMonaco } from '@monaco-editor/react'
 
@@ -60,6 +61,65 @@ function addCommands(
   editor.focus()
 }
 
+interface DialogRef {
+  open: () => void
+  hide: () => void
+}
+
+export const HelpDialog = forwardRef<DialogRef>(function HelpDialog({ }, ref) {
+  const [open, setOpen] = useState(false)
+  useImperativeHandle(ref, () => ({
+    open: () => setOpen(true),
+    hide: () => setOpen(false),
+  }), [])
+
+  const isMac = navigator.platform.includes('Mac')
+  const cmdOrCtrl = isMac ? 'Cmd' : 'Ctrl'
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '?') {
+        setOpen(true)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+  useEffect(() => {
+    if (open) {
+      const handleKeyUp = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setOpen(false)
+      }
+      document.addEventListener('keyup', handleKeyUp)
+      return () => document.removeEventListener('keyup', handleKeyUp)
+    }
+  })
+  return createPortal(<dialog
+    className='help'
+    autoFocus
+    open={open}
+  >
+    <div className='dialog__container'>
+      <div className='dialog__title'>
+        <h1>帮助</h1>
+        <button className='dialog__close' onClick={() => setOpen(false)}>×</button>
+      </div>
+      <div className="dialog__content">
+        <h2>快捷键</h2>
+        <ul>
+          <li><code>{cmdOrCtrl} + S</code>: 保存并复制链接</li>
+          <li><code>{cmdOrCtrl} + E</code>: 执行代码</li>
+        </ul>
+        <h2>支持的语言</h2>
+        <ul>
+          <li><code>JavaScript</code></li>
+          <li><code>TypeScript</code></li>
+        </ul>
+      </div>
+    </div>
+  </dialog>, document.body, 'help-dialog')
+})
+
 export default function EditorZone() {
   const searchParams = new URLSearchParams(location.search)
 
@@ -111,6 +171,8 @@ export default function EditorZone() {
     })
     innerTheme = theme
   }), [])
+
+  const helpDialogRef = useRef<DialogRef>(null)
   return <div className='editor-zone'
               ref={async ele => {
                 // wait monaco editor mount
@@ -167,6 +229,7 @@ export default function EditorZone() {
                   document.removeEventListener('mouseup', onGlobalMouseUp)
                 })
               }}>
+    <HelpDialog ref={helpDialogRef} />
     <div className='menu'>
       <div className='btns'>
         <button className='excute' onClick={() => {
@@ -175,6 +238,12 @@ export default function EditorZone() {
 
           dododo(code, 'javascript')
         }}>Execute</button>
+        <button className='history'>
+          History
+        </button>
+        <button className='help' onClick={() => helpDialogRef.current?.open()}>
+          Help
+        </button>
       </div>
       <div className='opts'>
         <select
