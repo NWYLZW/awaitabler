@@ -5,6 +5,7 @@ import type * as monacoEditor from 'monaco-editor'
 import Editor, { useMonaco } from '@monaco-editor/react'
 
 import examples from '../examples.ts'
+import Switcher from './Switcher.tsx'
 
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
@@ -60,8 +61,20 @@ function addCommands(
 }
 
 export default function EditorZone() {
+  const searchParams = new URLSearchParams(location.search)
+
+  const [language, setLanguage] = useState<'js' | 'ts'>(
+    searchParams.get('lang') === 'js' ? 'js' : 'ts'
+  )
+  function changeLanguage(lang: 'js' | 'ts') {
+    setLanguage(lang)
+    searchParams.set('lang', lang)
+    history.replaceState(null, '', '?' + searchParams.toString() + location.hash)
+  }
+
   const hash = location.hash.slice(1)
   const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : EXAMPLE_CODE)
+
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>(null)
   const effectFuncs = useRef<Function[]>([])
   useEffect(() => {
@@ -159,10 +172,34 @@ export default function EditorZone() {
 
         dododo(code, 'javascript')
       }}>Execute</button>
+      <Switcher lText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#4272ba' }} >
+                  <span style={{
+                    position: 'absolute',
+                    right: 1,
+                    bottom: -2,
+                    transform: 'scale(0.6)',
+                    fontWeight: 'blob'
+                  }}>TS</span>
+                </div>}
+                rText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#f2d949' }} >
+                  <span style={{
+                    position: 'absolute',
+                    right: 1,
+                    bottom: -2,
+                    transform: 'scale(0.6)',
+                    fontWeight: 'blob',
+                    color: 'black'
+                  }}>JS</span>
+                </div>}
+                value={language === 'js'}
+                onChange={checked => changeLanguage(checked ? 'js' : 'ts')}
+      />
     </div>
     <Editor
-      // TODO support switch typescript
-      language='typescript'
+      language={{
+        js: 'javascript',
+        ts: 'typescript',
+      }[language]}
       options={{
         automaticLayout: true,
         scrollbar: {
@@ -172,7 +209,7 @@ export default function EditorZone() {
         }
       }}
       value={code}
-      path='file:///index.ts'
+      path={`file:///index.${language}`}
       onChange={e => setCode(e ?? '')}
       onMount={(editor, monaco) => {
         // @ts-ignore
