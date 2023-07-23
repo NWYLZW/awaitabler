@@ -21,25 +21,38 @@
     window.addEventListener('message', e => {
       switch (e.data.type) {
         case 'run': {
-          const { code, lang } = e.data
-          /** @type {string} */
-          let runCode
-          switch (lang) {
+          let { code } = e.data
+          // noinspection FallThroughInSwitchStatementJS
+          switch (e.data.lang) {
+            case 'typescript': {
+              const { code: transformCode } = Babel.transform(code, {
+                presets: ['typescript'],
+                plugins: ['await-auto-box'],
+                filename: 'index.ts'
+              })
+              code = transformCode
+            }
             case 'javascript': {
               const { code: transformCode } = Babel.transform(code, {
                 presets: ['es2015'],
                 plugins: ['await-auto-box']
               })
-              runCode = transformCode
+              code = transformCode
               break
             }
+            default:
+              code = undefined
+          }
+          if (code === undefined) {
+            console.error('Unknown language')
+            return
           }
           try {
             const getExportsRunCode = `
 (function () {
   const module = { exports: {} };
   const exports = module.exports;
-  ${runCode};
+  ${code};
   return module.exports
 })()`.trim()
             prevDisposeFunc?.()

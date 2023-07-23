@@ -26,7 +26,10 @@ function copyToClipboard(text: string) {
   document.body.removeChild(input)
 }
 
-function addCommands(editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: typeof monacoEditor) {
+function addCommands(
+  editor: monacoEditor.editor.IStandaloneCodeEditor,
+  monaco: typeof monacoEditor
+) {
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
     history.pushState(null, '', '#' + btoa(encodeURIComponent(editor.getValue())))
     copyToClipboard(location.href)
@@ -36,7 +39,16 @@ function addCommands(editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: 
     const code = editor.getValue().trim()
     if (code === '') return
 
-    dododo(code, 'javascript')
+    const extension = editor.getModel()?.uri.path.split('.').pop()
+    const type = {
+      js: 'javascript',
+      ts: 'typescript',
+      // TODO support jsx and tsx
+      // jsx: 'javascriptXML',
+      // tsx: 'typescriptXML',
+    }[extension!]
+    type
+      && dododo(code, type)
   })
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow, function () {
     // 当光标位于第一行时触发
