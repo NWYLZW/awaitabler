@@ -39,7 +39,6 @@ jobs:
 
       - name: Build site
         run: |
-          yarn src build:dts
           yarn playground build
 
       - name: Deploy to GitHub Pages
