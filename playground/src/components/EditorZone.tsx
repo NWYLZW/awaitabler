@@ -1,9 +1,8 @@
 import './EditorZone.scss'
 
 import { useEffect, useRef, useState } from 'react'
-import * as monaco from 'monaco-editor'
-
-import Editor from '@monaco-editor/react'
+import type * as monacoEditor from 'monaco-editor'
+import Editor, { useMonaco } from '@monaco-editor/react'
 
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
@@ -26,6 +25,12 @@ async function main() {
 main()
 `
 
+// @ts-ignore
+const extraModules = EXTRA_MODULES as { content: string, filePath: string }[]
+const compilerOptions: monacoEditor.languages.typescript.CompilerOptions = {
+  moduleResolution: 2,
+}
+
 function copyToClipboard(text: string) {
   const input = document.createElement('input')
   input.value = text
@@ -35,7 +40,7 @@ function copyToClipboard(text: string) {
   document.body.removeChild(input)
 }
 
-function addCommands(editor: monaco.editor.IStandaloneCodeEditor) {
+function addCommands(editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: typeof monacoEditor) {
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
     history.pushState(null, '', '#' + btoa(encodeURIComponent(editor.getValue())))
     copyToClipboard(location.href)
@@ -59,7 +64,7 @@ function addCommands(editor: monaco.editor.IStandaloneCodeEditor) {
 export default function EditorZone() {
   const hash = location.hash.slice(1)
   const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : EXAMPLE_CODE)
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>(null)
+  const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>(null)
   const effectFuncs = useRef<Function[]>([])
   useEffect(() => {
     return () => {
@@ -67,6 +72,24 @@ export default function EditorZone() {
       effectFuncs.current = []
     }
   }, [])
+
+  const monaco = useMonaco()
+  useEffect(() => {
+    if (!monaco) return
+
+    const typescriptDefaults = monaco.languages.typescript.typescriptDefaults
+    const javascriptDefaults = monaco.languages.typescript.javascriptDefaults
+    typescriptDefaults.setCompilerOptions({ ...typescriptDefaults.getCompilerOptions(), ...compilerOptions })
+    javascriptDefaults.setCompilerOptions({ ...javascriptDefaults.getCompilerOptions(), ...compilerOptions })
+    extraModules.forEach(({ content, filePath }) => {
+      monaco.editor.createModel(content, 'typescript', monaco.Uri.parse(filePath))
+    })
+    return () => {
+      monaco.editor.getModels().forEach(model => {
+        if (model.uri.path.startsWith('/node_modules/')) model.dispose()
+      })
+    }
+  }, [monaco])
 
   let innerTheme = 'light'
   useEffect(() => onThemeChange(theme => {
@@ -156,22 +179,10 @@ export default function EditorZone() {
       onMount={(editor, monaco) => {
         // @ts-ignore
         editorRef.current = editor
-        addCommands(editor)
-        editorRef.current?.updateOptions({
+        editorRef.current.updateOptions({
           theme: innerTheme === 'light' ? 'vs' : 'vs-dark'
         })
-        // @ts-ignore
-        const extraModules = EXTRA_MODULES as { content: string, filePath: string }[]
-        const typescriptDefaults = monaco.languages.typescript.typescriptDefaults
-        const javascriptDefaults = monaco.languages.typescript.javascriptDefaults
-        const compilerOptions: monaco.languages.typescript.CompilerOptions = {
-          moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-        }
-        typescriptDefaults.setCompilerOptions({ ...typescriptDefaults.getCompilerOptions(), ...compilerOptions })
-        javascriptDefaults.setCompilerOptions({ ...javascriptDefaults.getCompilerOptions(), ...compilerOptions })
-        extraModules.forEach(({ content, filePath }) => {
-          monaco.editor.createModel(content, 'typescript', monaco.Uri.parse(filePath))
-        })
+        addCommands(editor, monaco)
       }}
     />
   </div>
