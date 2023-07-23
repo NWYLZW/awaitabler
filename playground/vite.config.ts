@@ -22,26 +22,26 @@ function findFilesBy(
 }
 
 function commonInjectOptionsData() {
-  const MONACO_DTS_FILES: { content: string, filePath: string }[] = []
+  const EXTRA_MODULES: { content: string, filePath: string }[] = []
 
-  function importDTSFiles(module: string, targetPath: string) {
+  function importTSFiles(module: string, targetPath: string) {
     function addDtsFileContent(filePath: string) {
       const content = fs.readFileSync(filePath, 'utf-8')
-      MONACO_DTS_FILES.push({
+      EXTRA_MODULES.push({
         content,
-        filePath: filePath.replace(targetPath, `file:///node_modules/@types/${module}`)
+        filePath: filePath.replace(targetPath, `file:///node_modules/${module}`)
       })
     }
     findFilesBy(targetPath, ['.ts', '.d.ts'], addDtsFileContent)
   }
 
-  importDTSFiles('awaitabler', path.join(__dirname, '../node_modules', 'awaitabler', 'dist'))
+  importTSFiles('awaitabler', path.join(__dirname, '../node_modules', 'awaitabler'))
   return {
-    MONACO_DTS_FILES: JSON.stringify(MONACO_DTS_FILES)
+    EXTRA_MODULES: JSON.stringify(EXTRA_MODULES)
   }
 }
 
-const { MONACO_DTS_FILES } = commonInjectOptionsData()
+const { EXTRA_MODULES } = commonInjectOptionsData()
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -57,6 +57,6 @@ export default defineConfig({
   },
   define: {
     MODE: '"esm"',
-    MONACO_DTS_FILES
+    EXTRA_MODULES: EXTRA_MODULES
   }
 })

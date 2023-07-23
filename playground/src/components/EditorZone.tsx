@@ -141,7 +141,7 @@ export default function EditorZone() {
     </div>
     <Editor
       // TODO support switch typescript
-      language='javascript'
+      language='typescript'
       options={{
         automaticLayout: true,
         scrollbar: {
@@ -151,7 +151,7 @@ export default function EditorZone() {
         }
       }}
       value={code}
-      path='file:///index.js'
+      path='file:///index.ts'
       onChange={e => setCode(e ?? '')}
       onMount={(editor, monaco) => {
         // @ts-ignore
@@ -161,12 +161,16 @@ export default function EditorZone() {
           theme: innerTheme === 'light' ? 'vs' : 'vs-dark'
         })
         // @ts-ignore
-        const dtsFiles = MONACO_DTS_FILES as { content: string, filePath: string }[]
+        const extraModules = EXTRA_MODULES as { content: string, filePath: string }[]
         const typescriptDefaults = monaco.languages.typescript.typescriptDefaults
         const javascriptDefaults = monaco.languages.typescript.javascriptDefaults
-        dtsFiles.forEach(({ content, filePath }) => {
-          typescriptDefaults.addExtraLib(content, filePath)
-          javascriptDefaults.addExtraLib(content, filePath)
+        const compilerOptions: monaco.languages.typescript.CompilerOptions = {
+          moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+        }
+        typescriptDefaults.setCompilerOptions({ ...typescriptDefaults.getCompilerOptions(), ...compilerOptions })
+        javascriptDefaults.setCompilerOptions({ ...javascriptDefaults.getCompilerOptions(), ...compilerOptions })
+        extraModules.forEach(({ content, filePath }) => {
+          monaco.editor.createModel(content, 'typescript', monaco.Uri.parse(filePath))
         })
       }}
     />
