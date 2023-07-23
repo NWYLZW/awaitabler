@@ -13,9 +13,9 @@ export default function Switcher(props: SwitcherProps) {
   const { value, onChange } = props
   const widthCacheRef = useRef<[number?, number?]>([])
   const [cardWidth, setCardWidth] = useState(0)
-  const change = (value: boolean) => {
-    onChange(value)
-    setCardWidth(widthCacheRef.current[value ? 0 : 1]!)
+  const change = (val: boolean) => {
+    value !== val && onChange(val)
+    setCardWidth(widthCacheRef.current[val ? 0 : 1]!)
   }
   return <div className='switcher'>
     <div
