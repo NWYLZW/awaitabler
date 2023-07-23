@@ -148,19 +148,26 @@ export default function EditorZone() {
   useEffect(() => {
     if (!monaco) return
 
-    const typescriptDefaults = monaco.languages.typescript.typescriptDefaults
-    const javascriptDefaults = monaco.languages.typescript.javascriptDefaults
-    typescriptDefaults.setCompilerOptions({ ...typescriptDefaults.getCompilerOptions(), ...compilerOptions })
-    javascriptDefaults.setCompilerOptions({ ...javascriptDefaults.getCompilerOptions(), ...compilerOptions })
+    let defaults: monacoEditor.languages.typescript.LanguageServiceDefaults
+    if (language === 'js') {
+      defaults = monaco.languages.typescript.javascriptDefaults
+    } else {
+      defaults = monaco.languages.typescript.typescriptDefaults
+    }
+    defaults.setCompilerOptions({ ...defaults.getCompilerOptions(), ...compilerOptions })
     extraModules.forEach(({ content, filePath }) => {
-      monaco.editor.createModel(content, 'typescript', monaco.Uri.parse(filePath))
+      monaco.editor.createModel(
+        content,
+        language === 'js' ? 'javascript' : 'typescript',
+        monaco.Uri.parse(filePath)
+      )
     })
     return () => {
       monaco.editor.getModels().forEach(model => {
         if (model.uri.path.startsWith('/node_modules/')) model.dispose()
       })
     }
-  }, [monaco])
+  }, [language, monaco])
 
   let innerTheme = 'light'
   useEffect(() => onThemeChange(theme => {
