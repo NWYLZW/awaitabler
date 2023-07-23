@@ -167,6 +167,11 @@ export const HistoryDialog = forwardRef<DialogRef, {
   const [historyList, dispatch] = useCodeHistory()
   const [selected, setSelected] = useState(0)
   const history = useMemo(() => historyList[selected], [historyList, selected])
+  // TODO auto scroll
+  // TODO remove history item
+  // TODO configure max history length
+  // TODO save and load lang
+  // TODO set code history item name
   return createPortal(<dialog
     className='history'
     autoFocus
