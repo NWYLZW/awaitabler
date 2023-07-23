@@ -54,7 +54,6 @@ export default {
         use,
         questerMiddleware
     } from 'awaitabler'
-
     Awaitabler.registerAll()
 
     const effectFuncs = []
@@ -64,7 +63,7 @@ export default {
             && ctx.tags.includes('get:JSON')
         ) {
             return (
-                await next()
+                <Response><unknown>await next()
             ).json()
         }
     }))
@@ -74,13 +73,13 @@ export default {
     }
 
     interface Todo {
-        id: number
         userId: number
+        id: number
         title: string
         completed: boolean
     }
     async function main() {
-        const { title, completed } = <Todo><unknown> (
+        const { title, completed } = <Todo><unknown>(
             await '[get:JSON] https://jsonplaceholder.typicode.com/todos/1'
         )
         console.log({ title, completed })
