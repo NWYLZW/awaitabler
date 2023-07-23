@@ -75,6 +75,8 @@ export default function EditorZone() {
   const hash = location.hash.slice(1)
   const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : EXAMPLE_CODE)
 
+  const [exampleName, setExampleName] = useState<string>(!hash ? 'base' : '')
+
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>(null)
   const effectFuncs = useRef<Function[]>([])
   useEffect(() => {
@@ -166,13 +168,33 @@ export default function EditorZone() {
                 })
               }}>
     <div className='menu'>
-      <button className='excute' onClick={() => {
-        const code = editorRef.current?.getValue().trim()
-        if (code === '' || code === undefined) return
+      <div className='btns'>
+        <button className='excute' onClick={() => {
+          const code = editorRef.current?.getValue().trim()
+          if (code === '' || code === undefined) return
 
-        dododo(code, 'javascript')
-      }}>Execute</button>
-      <Switcher lText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#4272ba' }} >
+          dododo(code, 'javascript')
+        }}>Execute</button>
+      </div>
+      <div className='opts'>
+        <select
+          value={exampleName}
+          onChange={e => {
+            const value = e.target.value
+            // @ts-ignore
+            const example = examples[value]?.[language]
+            if (!example) {
+              alert('示例暂未添加')
+              e.target.value = exampleName
+              return
+            }
+            setCode(example)
+            setExampleName(value)
+          }}>
+          <option value='base'>基本示例</option>
+          <option value='middleware'>中间件</option>
+        </select>
+        <Switcher lText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#4272ba' }} >
                   <span style={{
                     position: 'absolute',
                     right: 1,
@@ -180,8 +202,8 @@ export default function EditorZone() {
                     transform: 'scale(0.6)',
                     fontWeight: 'blob'
                   }}>TS</span>
-                </div>}
-                rText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#f2d949' }} >
+        </div>}
+                  rText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#f2d949' }} >
                   <span style={{
                     position: 'absolute',
                     right: 1,
@@ -190,10 +212,22 @@ export default function EditorZone() {
                     fontWeight: 'blob',
                     color: 'black'
                   }}>JS</span>
-                </div>}
-                value={language === 'js'}
-                onChange={checked => changeLanguage(checked ? 'js' : 'ts')}
-      />
+                  </div>}
+                  value={language === 'js'}
+                  onChange={checked => {
+                    if (!hash) {
+                      // @ts-ignore
+                      const example = examples[exampleName]?.[checked ? 'js' : 'ts']
+                      if (!example) {
+                        alert('示例暂未添加')
+                        return
+                      }
+                      setCode(example)
+                    }
+                    changeLanguage(checked ? 'js' : 'ts')
+                  }}
+        />
+      </div>
     </div>
     <Editor
       language={{
