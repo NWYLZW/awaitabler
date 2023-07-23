@@ -11,8 +11,6 @@ import Switcher from './Switcher.tsx'
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
 
-const EXAMPLE_CODE = examples.base.ts
-
 // @ts-ignore
 const extraModules = EXTRA_MODULES as { content: string, filePath: string }[]
 const compilerOptions: monacoEditor.languages.typescript.CompilerOptions = {
@@ -133,7 +131,7 @@ export default function EditorZone() {
   }
 
   const hash = location.hash.slice(1)
-  const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : EXAMPLE_CODE)
+  const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : examples.base[language])
 
   const [exampleName, setExampleName] = useState<string>(!hash ? 'base' : '')
 
