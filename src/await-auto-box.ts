@@ -2,6 +2,13 @@ import type { PluginObj, types } from '@babel/core'
 import type { SpreadElement, Expression } from '@babel/types'
 import { declare } from '@babel/helper-plugin-utils'
 
+function getIdentifierName(expr: Expression) {
+  return {
+    ArrayExpression: 'all',
+    SequenceExpression: 'allSettled'
+  }[expr.type as string]
+}
+
 // argument = ArrayExpression (string | template | BinaryExpression)
 // argument = SequenceExpression (string | template | BinaryExpression)
 // argument = BinaryExpression
@@ -18,24 +25,29 @@ function multipleExpressionsResolve(t: typeof types, expr: Expression) {
       elements = expr.expressions
     }
     const newElements = elements.map(ele => {
-      if (ele?.type === 'StringLiteral' || ele?.type === 'TemplateLiteral') {
+      if (!ele) return ele
+
+      if (ele.type === 'StringLiteral' || ele.type === 'TemplateLiteral') {
         return t.newExpression(t.identifier('String'), [ele])
+      }
+      // if (ele?.type === 'BinaryExpression' && ['&&', '||'].includes(ele.operator)) {
+      // }
+      if (
+        ele.type === 'ArrayExpression'
+        || ele.type === 'SequenceExpression'
+      ) {
+        multipleExpressionsResolve(t, ele)?.(ne => ele = ne)
       }
       return ele
     })
     let identifierName: string | undefined = undefined
     if (elements.length > 1) {
-      identifierName = {
-        ArrayExpression: 'all',
-        SequenceExpression: 'allSettled'
-      }[expr.type]
+      identifierName = getIdentifierName(expr)
     }
     if (identifierName) {
-      return (func: (e: Expression) => void) => func(t.awaitExpression(
-        t.callExpression(
-          t.memberExpression(t.identifier('Promise'), t.identifier(identifierName!)),
-          [t.arrayExpression(newElements)]
-        )
+      return (func: (e: Expression) => void) => func(t.callExpression(
+        t.memberExpression(t.identifier('Promise'), t.identifier(identifierName!)),
+        [t.arrayExpression(newElements)]
       ))
     }
   }
@@ -117,7 +129,7 @@ export const awaitAutoBox = declare(({ types: t }) => {
         ),
       ))
     }
-    multipleExpressionsResolve(t, argument)?.(path.replaceWith.bind(path))
+    multipleExpressionsResolve(t, argument)?.(ne => path.replaceWith(t.awaitExpression(ne)))
   }
   return { visitor }
 })
