@@ -351,7 +351,7 @@ export default function EditorZone() {
           const code = editorRef.current?.getValue().trim()
           if (code === '' || code === undefined) return
 
-          dododo(code, 'javascript')
+          dododo(code, language === 'js' ? 'javascript' : 'typescript')
         }}>Execute</button>
         <button className='history' onClick={() => historyDialogRef.current?.open()}>
           History
