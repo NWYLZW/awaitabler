@@ -1,4 +1,5 @@
 import type { PluginObj } from '@babel/core'
+import type { SpreadElement, Expression } from '@babel/types'
 import { declare } from '@babel/helper-plugin-utils'
 
 export const awaitAutoBox = declare(({ types: t }) => {
@@ -76,6 +77,42 @@ export const awaitAutoBox = declare(({ types: t }) => {
           argument.arguments
         ),
       ))
+    }
+    // argument = ArrayExpression (string | template | BinaryExpression)
+    // argument = SequenceExpression (string | template | BinaryExpression)
+    // argument = BinaryExpression
+    if (
+      argument.type === 'ArrayExpression'
+      || argument.type === 'SequenceExpression'
+    ) {
+      let elements: (SpreadElement | Expression | null)[] = []
+      if (argument.type === 'ArrayExpression') {
+        elements = argument.elements
+      }
+      if (argument.type === 'SequenceExpression') {
+        elements = argument.expressions
+      }
+      const newElements = elements.map(ele => {
+        if (ele?.type === 'StringLiteral') {
+          return t.newExpression(t.identifier('String'), [ele])
+        }
+        return ele
+      })
+      let identifierName: string | undefined = undefined
+      if (elements.length > 1) {
+        identifierName = {
+          ArrayExpression: 'all',
+          SequenceExpression: 'allSettled'
+        }[argument.type]
+      }
+      if (identifierName) {
+        path.replaceWith(t.awaitExpression(
+          t.callExpression(
+            t.memberExpression(t.identifier('Promise'), t.identifier(identifierName)),
+            [t.arrayExpression(newElements)]
+          )
+        ))
+      }
     }
   }
   return { visitor }
