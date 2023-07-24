@@ -3,6 +3,7 @@ import { configure } from './configure'
 
 export default Self
 
+export * from './tags'
 export * from './quester'
 
 declare global {
