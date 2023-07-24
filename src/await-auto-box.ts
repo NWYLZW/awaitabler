@@ -18,7 +18,7 @@ function multipleExpressionsResolve(t: typeof types, expr: Expression) {
       elements = expr.expressions
     }
     const newElements = elements.map(ele => {
-      if (ele?.type === 'StringLiteral') {
+      if (ele?.type === 'StringLiteral' || ele?.type === 'TemplateLiteral') {
         return t.newExpression(t.identifier('String'), [ele])
       }
       return ele
