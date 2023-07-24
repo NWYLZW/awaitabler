@@ -193,6 +193,7 @@ export const HistoryDialog = forwardRef<DialogRef, {
         <div className='history__list'>
           {historyList.map((item, index) => (
             <div
+              key={item.time}
               className={'history__item'
                 + (index === selected ? ' history__item--selected' : '')}
               onClick={() => setSelected(index)}
