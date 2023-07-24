@@ -9,6 +9,13 @@ function getIdentifierName(expr: Expression) {
   }[expr.type as string]
 }
 
+function wrapStringSecure(t: typeof types, expr: Expression) {
+  if (expr.type === 'StringLiteral' || expr.type === 'TemplateLiteral') {
+    return t.newExpression(t.identifier('String'), [expr])
+  }
+  return expr
+}
+
 // argument = ArrayExpression (string | template | BinaryExpression)
 // argument = SequenceExpression (string | template | BinaryExpression)
 // argument = LogicalExpression
@@ -23,16 +30,16 @@ function multipleExpressionsResolve(t: typeof types, expr: Expression):
         return func => func(t.callExpression(
           t.memberExpression(t.identifier('Promise'), t.identifier('any')),
           [t.arrayExpression([
-            t.newExpression(t.identifier('String'), [expr.left]),
-            t.newExpression(t.identifier('String'), [expr.right])
+            wrapStringSecure(t, expr.left),
+            wrapStringSecure(t, expr.right)
           ])]
         ))
       // ('123' && '456')
       // await new String('123'), await new String('456')
       case '&&':
         return func => func(t.sequenceExpression([
-          t.awaitExpression(t.newExpression(t.identifier('String'), [expr.left])),
-          t.awaitExpression(t.newExpression(t.identifier('String'), [expr.right]))
+          t.awaitExpression(wrapStringSecure(t, expr.left)),
+          t.awaitExpression(wrapStringSecure(t, expr.right))
         ]), true)
     }
   }
@@ -87,13 +94,13 @@ function multipleExpressionsResolve(t: typeof types, expr: Expression):
         if (firstElement.operator === '||') {
           const first = t.callExpression(
             t.memberExpression(t.identifier('Promise'), t.identifier('resolve')),
-            [t.newExpression(t.identifier('String'), [firstElement.left])]
+            [wrapStringSecure(t, firstElement.left)]
           )
           return func => func(t.callExpression(
             t.memberExpression(first, t.identifier('catch')),
             [t.arrowFunctionExpression(
               [],
-              t.newExpression(t.identifier('String'), [firstElement.right])
+              wrapStringSecure(t, firstElement.right)
             )]
           ))
         }

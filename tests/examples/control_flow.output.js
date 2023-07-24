@@ -12,3 +12,5 @@ await Promise.any([new String('u0'), new String('u1')]);
 await new String('u0'), await new String('u1');
 await Promise.resolve(new String('u0')).catch(() => new String('u1'));
 [await new String('u0'), await new String('u1')];
+// no string
+await Promise.any([Promise.reject(1), new String('u0')]);

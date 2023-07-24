@@ -24,7 +24,7 @@ describe('Await Auto Box', function () {
   })
   it('test', () => {
     console.log(
-      transformSync(`await ['u0' && 'u1']`, { plugins: [awaitAutoBox] }).code
+      transformSync(`await (Promise.reject(1) || 'u0')`, { plugins: [awaitAutoBox] }).code
     )
   })
 })

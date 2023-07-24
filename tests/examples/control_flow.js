@@ -12,3 +12,5 @@ await ('u0' || 'u1')
 await ('u0' && 'u1')
 await ['u0' || 'u1']
 await ['u0' && 'u1']
+// no string
+await (Promise.reject(1) || 'u0')
