@@ -1,5 +1,5 @@
 import type { PluginObj, types } from '@babel/core'
-import type { SpreadElement, Expression } from '@babel/types'
+import type { SpreadElement, Expression, SequenceExpression } from '@babel/types'
 import { declare } from '@babel/helper-plugin-utils'
 
 function getIdentifierName(expr: Expression) {
@@ -11,10 +11,31 @@ function getIdentifierName(expr: Expression) {
 
 // argument = ArrayExpression (string | template | BinaryExpression)
 // argument = SequenceExpression (string | template | BinaryExpression)
-// argument = BinaryExpression
-function multipleExpressionsResolve(
-  t: typeof types, expr: Expression
-): | undefined | ((func: (e: Expression) => void) => void) {
+// argument = LogicalExpression
+function multipleExpressionsResolve(t: typeof types, expr: Expression):
+  | undefined
+  | ((func: (e: Expression, noAwait?: boolean) => void) => void) {
+  if (expr.type === 'LogicalExpression' && ['&&', '||'].includes(expr.operator)) {
+    switch (expr.operator) {
+      // ('123' || '456')
+      // Promise.any([new String('123'), new String('456')])
+      case '||':
+        return func => func(t.callExpression(
+          t.memberExpression(t.identifier('Promise'), t.identifier('any')),
+          [t.arrayExpression([
+            t.newExpression(t.identifier('String'), [expr.left]),
+            t.newExpression(t.identifier('String'), [expr.right])
+          ])]
+        ))
+      // ('123' && '456')
+      // await new String('123'), await new String('456')
+      case '&&':
+        return func => func(t.sequenceExpression([
+          t.awaitExpression(t.newExpression(t.identifier('String'), [expr.left])),
+          t.awaitExpression(t.newExpression(t.identifier('String'), [expr.right]))
+        ]), true)
+    }
+  }
   if (
     expr.type === 'ArrayExpression'
     || expr.type === 'SequenceExpression'
@@ -32,8 +53,6 @@ function multipleExpressionsResolve(
       if (ele.type === 'StringLiteral' || ele.type === 'TemplateLiteral') {
         return t.newExpression(t.identifier('String'), [ele])
       }
-      // if (ele?.type === 'BinaryExpression' && ['&&', '||'].includes(ele.operator)) {
-      // }
       if (
         ele.type === 'ArrayExpression'
         || ele.type === 'SequenceExpression'
@@ -52,6 +71,33 @@ function multipleExpressionsResolve(
       && firstElement !== null
       && firstElement.type !== 'SpreadElement'
     ) {
+      if (firstElement.type === 'LogicalExpression') {
+        let tempEle: Expression = firstElement
+        // ['123' && '456']
+        // [await new String('123'), await new String('456')]
+        if (firstElement.operator === '&&') {
+          multipleExpressionsResolve(t, firstElement)?.(ne => tempEle = ne)
+          const computedEle = tempEle as unknown as SequenceExpression
+          return func => func(t.arrayExpression(computedEle.expressions), true)
+        }
+        // ['123' || '456']
+        // Promise
+        //   .resolve(new String('u0'))
+        //   .catch(() => new String('u1'))
+        if (firstElement.operator === '||') {
+          const first = t.callExpression(
+            t.memberExpression(t.identifier('Promise'), t.identifier('resolve')),
+            [t.newExpression(t.identifier('String'), [firstElement.left])]
+          )
+          return func => func(t.callExpression(
+            t.memberExpression(first, t.identifier('catch')),
+            [t.arrowFunctionExpression(
+              [],
+              t.newExpression(t.identifier('String'), [firstElement.right])
+            )]
+          ))
+        }
+      }
       return func => func(firstElement)
     }
     if (identifierName) {
@@ -139,7 +185,12 @@ export const awaitAutoBox = declare(({ types: t }) => {
         ),
       ))
     }
-    multipleExpressionsResolve(t, argument)?.(ne => path.replaceWith(t.awaitExpression(ne)))
+    multipleExpressionsResolve(t, argument)
+      ?.((ne, noAwait) => path.replaceWith(
+        noAwait
+          ? ne
+          : t.awaitExpression(ne)
+      ))
   }
   return { visitor }
 })

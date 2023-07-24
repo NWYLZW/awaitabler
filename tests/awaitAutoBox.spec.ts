@@ -8,7 +8,7 @@ import { expect } from 'chai'
 
 describe('Await Auto Box', function () {
   it('should transform right by Babel.', () => {
-    const cases = ['common', 'callable', 'await_with_arguments']
+    const cases = ['await_with_arguments', 'common', 'callable', 'control_flow']
     for (const caseName of cases) {
       const fileContent = fs
         .readFileSync(path.resolve(__dirname,
@@ -24,7 +24,7 @@ describe('Await Auto Box', function () {
   })
   it('test', () => {
     console.log(
-      transformSync("await ['u0', 'u1']", { plugins: [awaitAutoBox] }).code
+      transformSync(`await ['u0' && 'u1']`, { plugins: [awaitAutoBox] }).code
     )
   })
 })

@@ -91,12 +91,23 @@ const u = await ''`${'https:///users/@me'}`
 ```typescript
 await ['u0', 'u1']
 // await Promise.all([ 'u0'.f, 'u1'.f ])
+
 await ('u0', 'u1')
 // await Promise.allSettled([ 'u0'.f, 'u1'.f ])
-await ('u0' || 'u1')
-// await Promise.any([ 'u0'.f, 'u1'.f ])
+
 await ['u0' && 'u1']
 // [await 'u0', await 'u1']
+
+await ['u0' || 'u1']
+/**
+ * let a = await 'u0'
+ * if (a) return a
+ * return await 'u1'
+ */
+
+await ('u0' || 'u1')
+// await Promise.any([ 'u0'.f, 'u1'.f ])
+
 await ('u0' && 'u1')
 // (await 'u0', await 'u1')
 
