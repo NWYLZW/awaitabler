@@ -12,7 +12,9 @@ function getIdentifierName(expr: Expression) {
 // argument = ArrayExpression (string | template | BinaryExpression)
 // argument = SequenceExpression (string | template | BinaryExpression)
 // argument = BinaryExpression
-function multipleExpressionsResolve(t: typeof types, expr: Expression) {
+function multipleExpressionsResolve(
+  t: typeof types, expr: Expression
+): | undefined | ((func: (e: Expression) => void) => void) {
   if (
     expr.type === 'ArrayExpression'
     || expr.type === 'SequenceExpression'
@@ -44,8 +46,16 @@ function multipleExpressionsResolve(t: typeof types, expr: Expression) {
     if (elements.length > 1) {
       identifierName = getIdentifierName(expr)
     }
+    const firstElement = elements[0]
+    if (
+      elements.length === 1
+      && firstElement !== null
+      && firstElement.type !== 'SpreadElement'
+    ) {
+      return func => func(firstElement)
+    }
     if (identifierName) {
-      return (func: (e: Expression) => void) => func(t.callExpression(
+      return func => func(t.callExpression(
         t.memberExpression(t.identifier('Promise'), t.identifier(identifierName!)),
         [t.arrayExpression(newElements)]
       ))
