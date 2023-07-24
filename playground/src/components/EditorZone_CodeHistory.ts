@@ -33,7 +33,6 @@ const EMPTY: CodeHistoryItem[] = []
 export function useCodeHistory() {
   const codes = useSyncExternalStore(subscribeCodeHistory, () => codeHistory ?? EMPTY)
   useEffect(() => {
-    console.log('codes', codes)
     dispatch({ type: 'set', codes })
   }, [codes])
   const [data, dispatch] = useReducer((
@@ -53,7 +52,6 @@ export function useCodeHistory() {
     }
   }, codes)
   useEffect(() => {
-    console.log('data', data)
     setCodeHistory(data)
   }, [data])
   return [data, dispatch] as const
