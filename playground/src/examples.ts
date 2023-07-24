@@ -47,6 +47,33 @@ export default {
     main()
     `).trim(),
   },
+  'await.opts': {
+    ts: trimIndentation(`
+    import Awaitabler from 'awaitabler'
+    Awaitabler.registerAll()
+    Awaitabler.use(Awaitabler.questerMiddleware)
+
+    async function main() {
+        // \`await Promise.all([...])\`
+        const resps = <Response[]><unknown>await [
+            'https://jsonplaceholder.typicode.com/todos/1',
+            'https://jsonplaceholder.typicode.com/todos/1'
+        ]
+        console.log('resps', resps)
+        // \`await Promise.allSettled([...])\`
+        const results = <PromiseSettledResult<Response>[]><unknown>await (
+            Promise.reject(1),
+            'https://jsonplaceholder.typicode.com/todos/1'
+        )
+        console.log('results', results)
+        // \`await Promise.any([...])\`
+        const result = <Response><unknown>await (Promise.reject(1) || 'https://jsonplaceholder.typicode.com/todos/1')
+        console.log('result', result)
+        // no race
+    }
+    main()
+    `).trim()
+  },
   middleware: {
     ts: trimIndentation(`
     // try it, press \`(Ctrl|Cmd) + E\` to run

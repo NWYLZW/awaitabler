@@ -376,6 +376,7 @@ export default function EditorZone() {
             setExampleName(value)
           }}>
           <option value='base'>基本示例</option>
+          <option value='await.opts'>控制流</option>
           <option value='middleware'>中间件</option>
         </select>
         <Switcher lText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#4272ba' }} >
