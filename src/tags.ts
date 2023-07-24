@@ -1,5 +1,4 @@
 export interface Tags {
-  [namespace: string]: { [K in string]: string }
 }
 
 export let tags: Readonly<Partial<Tags>>

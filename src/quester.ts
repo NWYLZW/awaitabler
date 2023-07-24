@@ -18,7 +18,7 @@ export const questerMiddleware = defineMiddleware(async (ctx, next) => {
   if (['http', 'https'].includes(ctx.schema)) {
     let p = fetch(ctx.target)
     if (ctx.tags.find(t => `[${t}]` === questerTags.json)) {
-      p = p.then((res) => res.json())
+      p = p.then(res => res.json())
     }
     return p
   }
