@@ -84,8 +84,17 @@
   <script src="/target.js" embedded="true"></script>
   <style type="text/css">
     html, body { margin: 0; padding: 0; }
+    .__chobitsu-hide__ { height: 100% !important; }
   </style>
 </head>
 <body>
+
+<script src="//cdn.jsdelivr.net/npm/sentinel-js"></script>
+<script type="module">
+  sentinel.on('.__chobitsu-hide__', _el => {
+    const el = /** @type {HTMLDivElement} */ (_el)
+    el.children[0]?.remove()
+  });
+</script>
 </body>
 </html>
