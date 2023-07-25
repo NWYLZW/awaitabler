@@ -240,12 +240,6 @@ export default function EditorZone() {
 
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>(null)
   const effectFuncs = useRef<Function[]>([])
-  useEffect(() => {
-    return () => {
-      effectFuncs.current.forEach(func => func())
-      effectFuncs.current = []
-    }
-  }, [])
 
   const monaco = useMonaco()
   useEffect(() => {
@@ -331,6 +325,8 @@ export default function EditorZone() {
                   })
                 }
 
+                effectFuncs.current.forEach(func => func())
+                effectFuncs.current = []
                 el.addEventListener('mousedown', elMouseDown, false)
                 document.addEventListener('mouseup', onGlobalMouseUp)
                 // 使用 ref + el 的方式会在热载（或其他组件重载的情况下）后产生副作用未被收集的问题
