@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Eval Logs</title>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="module">
     import awaitAutoBox from 'awaitabler/await-auto-box'
     Babel.registerPlugin('await-auto-box', awaitAutoBox)
@@ -71,7 +71,14 @@
       }
     })
     localStorage.setItem('chii-embedded-height', 10000)
+
     localStorage.setItem('panel-selectedTab', '"console"')
+    localStorage.setItem(
+      "viewsLocationOverride",
+      JSON.stringify({ resources: "none", elements: "none", network: "none", sources: "none" }),
+    )
+    localStorage.setItem("consoleShowSettingsToolbar", JSON.stringify(false))
+
     localStorage.setItem('textEditorIndent', '"  "')
   </script>
   <script src="/target.js" embedded="true"></script>

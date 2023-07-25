@@ -14,7 +14,10 @@
 <script type="module">
   sentinel.on('.main-tabbed-pane', (el) => {
     const style = document.createElement('style')
-    style.innerHTML = `.tabbed-pane-header { display: none!important; }`
+    style.innerText = `
+    .tabbed-pane-header > .tabbed-pane-left-toolbar.toolbar {
+      display: none !important;
+    }`
     el.shadowRoot.prepend(style)
   });
 </script>
