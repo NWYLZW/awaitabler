@@ -137,3 +137,32 @@ for await (const buffer of 'https://stream.com') {
     console.log(file0)
 }
 ```
+
+## 字符串以外的道路
+
+### Number
+
+哈哈，赞美 js
+
+```typescript
+await 1..s
+// await new Promise(resolve => setTimeout(resolve, 1 * 1000))
+await 1.2.s
+// await new Promise(resolve => setTimeout(resolve, 1.2 * 1000))
+await 1..m
+// await new Promise(resolve => setTimeout(resolve, 1 * 60 * 1000))
+await 1`s`
+await 1.2`s`
+```
+
+### BigInt
+
+说起来应该也算是 Number 的，但是还是按照 primitives 拆出来吧。
+
+```typescript
+await 1n.s
+// await new Promise(resolve => setTimeout(resolve, 1 * 1000))
+await 1n.m
+// await new Promise(resolve => setTimeout(resolve, 1 * 60 * 1000))
+await 1n`s`
+```
