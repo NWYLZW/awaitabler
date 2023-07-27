@@ -14,7 +14,7 @@ export default {
     // try it, press \`(Ctrl|Cmd) + E\` to run
     import Awaitabler from 'awaitabler'
 
-    Awaitabler.registerAll()
+    Awaitabler.regAll()
     Awaitabler.use(Awaitabler.questerMiddleware)
 
     async function main() {
@@ -32,7 +32,7 @@ export default {
     // try it, press \`(Ctrl|Cmd) + E\` to run
     import Awaitabler from 'awaitabler'
 
-    Awaitabler.registerAll()
+    Awaitabler.regAll()
     Awaitabler.use(Awaitabler.questerMiddleware)
 
     async function main() {
@@ -50,7 +50,7 @@ export default {
   'await.opts': {
     ts: trimIndentation(`
     import Awaitabler from 'awaitabler'
-    Awaitabler.registerAll()
+    Awaitabler.regAll()
     Awaitabler.use(Awaitabler.questerMiddleware)
 
     async function main() {
@@ -81,7 +81,7 @@ export default {
         use,
         questerMiddleware
     } from 'awaitabler'
-    Awaitabler.registerAll()
+    Awaitabler.regAll()
 
     const effectFuncs = []
     effectFuncs.push(use(async (ctx, next) => {

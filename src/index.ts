@@ -126,7 +126,7 @@ export function registerString() {
 export * from './prototypes/number.reg'
 import regNumber from './prototypes/number.reg'
 
-export function registerAll() {
+export function regAll() {
   regNumber()
   registerString()
 }
