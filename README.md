@@ -153,6 +153,9 @@ await 1..m
 // await new Promise(resolve => setTimeout(resolve, 1 * 60 * 1000))
 await 1`s`
 await 1.2`s`
+await Infinity.s
+await 1e0.s
+await 123e-1.s
 ```
 
 ### BigInt
@@ -165,4 +168,10 @@ await 1n.s
 await 1n.m
 // await new Promise(resolve => setTimeout(resolve, 1 * 60 * 1000))
 await 1n`s`
+```
+
+### Regexp
+
+```typescript
+await /https:\/\/jsonplaceholder\.typicode\.com\/todos\/1/
 ```
