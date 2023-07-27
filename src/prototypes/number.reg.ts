@@ -19,21 +19,23 @@ function isFiniteWrap(func: (this: Number) => Promise<void>) {
   }
 }
 function defineProperty(prop: string, func: (this: Number) => Promise<void>) {
-  Object.defineProperty(Number, prop, {
-    writable: false,
-    enumerable: false,
-    configurable: false,
-    value: isFiniteWrap(func)
-  })
-  Object.defineProperty(BigInt, prop, {
-    writable: false,
-    enumerable: false,
-    configurable: false,
-    value: func
-  })
+  // @ts-ignore
+  !Number.prototype[prop]
+    && Object.defineProperty(Number.prototype, prop, {
+      enumerable: false,
+      configurable: false,
+      get: isFiniteWrap(func)
+    })
+  // @ts-ignore
+  !BigInt.prototype[prop]
+    && Object.defineProperty(BigInt.prototype, prop, {
+      enumerable: false,
+      configurable: false,
+      get: func
+    })
 }
 export function defineSleepProp(prop: string, times: number) {
-  defineProperty(prop, function () { return sleep(this.valueOf() * times) })
+  defineProperty(prop, function () { return sleep(Number(this) * times) })
 }
 
 export default function regNumber() {
