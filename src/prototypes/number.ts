@@ -1,3 +1,3 @@
 import regNumber from './number.reg'
 
-regNumber()
+export const dispose = regNumber()

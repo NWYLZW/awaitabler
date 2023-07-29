@@ -44,6 +44,9 @@ import regNumber from './prototypes/number.reg'
 import regString from './prototypes/string.reg'
 
 export function regAll() {
-  regNumber()
-  regString()
+  const disposeFuncs = [
+    regNumber(),
+    regString()
+  ]
+  return () => disposeFuncs.forEach(dispose => dispose())
 }

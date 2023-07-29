@@ -1,3 +1,3 @@
 import regString from './string.reg'
 
-regString()
+export const dispose = regString()
