@@ -1,8 +1,9 @@
 import './EditorZone.scss'
 
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useMemo } from 'react'
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useMemo, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import type * as monacoEditor from 'monaco-editor'
+import loader from '@monaco-editor/loader'
 import Editor, { useMonaco } from '@monaco-editor/react'
 
 import examples from '../examples.ts'
@@ -21,18 +22,15 @@ const awaitablerCodes = import.meta.glob([
   as: 'raw',
   eager: true,
 })
-const fixDTSFiles = import.meta.glob(['./monaco-editor/**/*.d.ts'], {
-  as: 'raw',
-  eager: true,
-})
 const extraModules = Object
   .entries(Object.assign(
     {},
-    awaitablerCodes,
-    fixDTSFiles
+    awaitablerCodes
   ))
   .reduce((acc, [filePath, content]) => acc.concat({
-    filePath: filePath.replace(/^.*\/src/, '/node_modules/awaitabler'),
+    filePath: filePath
+      .replace(/^.*\/src/, '/node_modules/awaitabler')
+      .replace(/^\.\//, ''),
     content
   }), [] as { content: string, filePath: string }[])
 const compilerOptions: monacoEditor.languages.typescript.CompilerOptions = {
@@ -255,6 +253,15 @@ export default function EditorZone() {
   }
   const curFilePath = useMemo(() => `/index.${language}`, [language])
 
+  const [typescriptVersion, setTypescriptVersion] = useState<string>(
+    searchParams.get('ts') ?? '5.2.0-beta'
+  )
+  function changeTypescriptVersion(ts: string) {
+    setTypescriptVersion(ts)
+    searchParams.set('ts', ts)
+    history.replaceState(null, '', '?' + searchParams.toString() + location.hash)
+  }
+
   const hash = location.hash.slice(1)
   const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : examples.base[language])
 
@@ -263,6 +270,11 @@ export default function EditorZone() {
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>(null)
   const effectFuncs = useRef<Function[]>([])
 
+  useLayoutEffect(() => {
+    loader.config({
+      paths: { vs: `https://typescript.azureedge.net/cdn/${typescriptVersion}/monaco/min/vs` }
+    })
+  }, [typescriptVersion])
   const monaco = useMonaco()
   useEffect(() => {
     if (!monaco) return
@@ -281,6 +293,10 @@ export default function EditorZone() {
         monaco.Uri.parse(filePath)
       )
     })
+    console.group('monaco detail data')
+    console.log('typescript.version', monaco.languages.typescript.typescriptVersion)
+    console.log('typescript.CompilerOptions', monaco.languages.typescript.typescriptDefaults.getCompilerOptions())
+    console.groupEnd()
     return () => {
       monaco.editor.getModels().forEach(model => {
         if (model.uri.path !== curFilePath) model.dispose()
