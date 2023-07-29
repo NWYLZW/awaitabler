@@ -398,23 +398,23 @@ export default function EditorZone() {
           <option value='Make number awaitabler'>数字也可以！</option>
         </select>
         <Switcher lText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#4272ba' }} >
-                  <span style={{
-                    position: 'absolute',
-                    right: 1,
-                    bottom: -2,
-                    transform: 'scale(0.6)',
-                    fontWeight: 'blob'
-                  }}>TS</span>
-        </div>}
+                    <span style={{
+                      position: 'absolute',
+                      right: 1,
+                      bottom: -2,
+                      transform: 'scale(0.6)',
+                      fontWeight: 'blob'
+                    }}>TS</span>
+                  </div>}
                   rText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#f2d949' }} >
-                  <span style={{
-                    position: 'absolute',
-                    right: 1,
-                    bottom: -2,
-                    transform: 'scale(0.6)',
-                    fontWeight: 'blob',
-                    color: 'black'
-                  }}>JS</span>
+                    <span style={{
+                      position: 'absolute',
+                      right: 1,
+                      bottom: -2,
+                      transform: 'scale(0.6)',
+                      fontWeight: 'blob',
+                      color: 'black'
+                    }}>JS</span>
                   </div>}
                   value={language === 'js'}
                   onChange={checked => {
