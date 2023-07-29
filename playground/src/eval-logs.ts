@@ -30,11 +30,11 @@ window.require = function (name) {
 
 let prevDisposeFunc: Function
 
-function addDisposeFunc(func: Function) {
+function addDisposeFunc(func?: Function) {
   let oldDisposeFunc = prevDisposeFunc
   prevDisposeFunc = () => {
     oldDisposeFunc?.()
-    func()
+    func?.()
   }
 }
 

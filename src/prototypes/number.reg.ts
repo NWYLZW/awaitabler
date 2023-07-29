@@ -1,3 +1,5 @@
+import { safeChangePrototype } from './utils'
+
 declare global {
   interface Number {
     ms: Promise<void>
@@ -21,34 +23,19 @@ function isFiniteWrap(func: (this: Number) => Promise<void>) {
 function defineProperty(prop: string, func: (this: Number | BigInt) => Promise<void>) {
   const wrapFunc = isFiniteWrap(func)
 
-  // @ts-ignore
-  const cache00 = Number.prototype[prop]
-  !cache00
-    && Object.defineProperty(Number.prototype, prop, {
+  const disposeFuncs = [
+    safeChangePrototype(Number.prototype, prop, {
       enumerable: false,
-      configurable: false,
+      configurable: true,
       get: wrapFunc
-    })
-  // @ts-ignore
-  const cache10 = BigInt.prototype[prop]
-  !cache10
-    && Object.defineProperty(BigInt.prototype, prop, {
+    }),
+    safeChangePrototype(BigInt.prototype, prop, {
       enumerable: false,
-      configurable: false,
+      configurable: true,
       get: wrapFunc
-    })
-  return () => {
-    // @ts-ignore
-    if (Number.prototype[prop] !== wrapFunc) {
-      // @ts-ignore
-      Number.prototype[prop] = cache00
-    }
-    // @ts-ignore
-    if (BigInt.prototype[prop] !== wrapFunc) {
-      // @ts-ignore
-      BigInt.prototype[prop] = cache10
-    }
-  }
+    }),
+  ]
+  return () => disposeFuncs.forEach(func => func())
 }
 export function defineSleepProp(prop: string, times: number) {
   return defineProperty(prop, function () { return sleep(Number(this) * times) })

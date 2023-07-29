@@ -1,5 +1,7 @@
 import { configure, consumeMiddlewares, Context } from 'awaitabler'
 
+import { safeChangePrototype } from './utils'
+
 declare global {
   export interface StringFunction {
     <T extends Record<string, unknown>>(config: T): Promise<T>
@@ -79,20 +81,22 @@ export default function regString() {
   }) as StringFunction
   const cache01 = This.StringFunction
 
-  const cache10 = String.prototype.then
-  String.prototype.then = function (on0, on1) {
-    return consumeMiddlewares(
-      resolveContext(this.toString())
-    ).then(on0, on1)
-  }
-  const cache11 = String.prototype.then
+  const disposeThen = safeChangePrototype(String.prototype, 'then', {
+    enumerable: false,
+    configurable: true,
+    get(): (typeof String.prototype)['then'] {
+      return (on0, on1) => {
+        return consumeMiddlewares(
+          resolveContext(this.toString())
+        ).then(on0, on1)
+      }
+    }
+  })
 
   return () => {
     if (cache01 === This.StringFunction) {
       This.StringFunction = cache00
     }
-    if (cache11 === String.prototype.then) {
-      String.prototype.then = cache10
-    }
+    disposeThen()
   }
 }
