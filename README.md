@@ -156,6 +156,11 @@ await 1.2`s`
 await Infinity.s
 await 1e0.s
 await 123e-1.s
+
+const ac = new AbortController()
+setTimeout(() => ac.abort(), 1000)
+
+await 1.5.s(ac.signal)
 ```
 
 ### BigInt

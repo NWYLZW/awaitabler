@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babel/standalone": "^7.22.9",
+    "@types/babel__standalone": "^7.1.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

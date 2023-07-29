@@ -3,92 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Eval Logs</title>
-  <script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="module">
-    import awaitAutoBox from 'awaitabler/await-auto-box'
-    Babel.registerPlugin('await-auto-box', awaitAutoBox)
-  </script>
-  <script type="module">
-    import Awaitabler from 'awaitabler'
-    window.require = function (name) {
-      switch (name) { case 'awaitabler': return Awaitabler }
-      throw new Error(`Cannot find module '${name}'`)
-    }
-  </script>
-  <script>
-    /** @type {Function} */
-    let prevDisposeFunc
-    window.addEventListener('message', e => {
-      switch (e.data.type) {
-        case 'run': {
-          let { code } = e.data
-          // noinspection FallThroughInSwitchStatementJS
-          switch (e.data.lang) {
-            case 'typescript': {
-              const { code: transformCode } = Babel.transform(code, {
-                presets: ['typescript'],
-                plugins: ['await-auto-box'],
-                filename: 'index.ts'
-              })
-              code = transformCode
-            }
-            case 'javascript': {
-              const { code: transformCode } = Babel.transform(code, {
-                presets: ['es2015'],
-                plugins: ['await-auto-box']
-              })
-              code = transformCode
-              break
-            }
-            default:
-              code = undefined
-          }
-          if (code === undefined) {
-            console.error('Unknown language')
-            return
-          }
-          try {
-            const getExportsRunCode = `
-(function () {
-  const module = { exports: {} };
-  const exports = module.exports;
-  ${code};
-  return module.exports
-})()`.trim()
-            prevDisposeFunc?.()
-            const { dispose } = eval(getExportsRunCode)
-            prevDisposeFunc = dispose
-          } catch (e) {
-            console.error(e)
-          }
-          break
-        }
-        case 'update:localStorage': {
-          const { key, data } = e.data
-          localStorage.setItem(key, JSON.stringify(data))
-          location.reload()
-        }
-      }
-    })
-    localStorage.setItem('chii-embedded-height', 10000)
-
-    localStorage.setItem('panel-selectedTab', '"console"')
-    localStorage.setItem(
-      "viewsLocationOverride",
-      JSON.stringify({ resources: "none", elements: "none", network: "none", sources: "none" }),
-    )
-    localStorage.setItem("consoleShowSettingsToolbar", JSON.stringify(false))
-
-    localStorage.setItem('textEditorIndent', '"  "')
-  </script>
-  <script src="/target.js" embedded="true"></script>
   <style type="text/css">
     html, body { margin: 0; padding: 0; }
     .__chobitsu-hide__ { height: 100% !important; }
   </style>
 </head>
 <body>
-
+<script type="module" src='src/eval-logs.ts'></script>
+<script src="/target.js" embedded="true"></script>
 <script src="//cdn.jsdelivr.net/npm/sentinel-js"></script>
 <script type="module">
   sentinel.on('.__chobitsu-hide__', _el => {
