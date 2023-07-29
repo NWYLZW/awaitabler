@@ -21,8 +21,16 @@ const awaitablerCodes = import.meta.glob([
   as: 'raw',
   eager: true,
 })
+const fixDTSFiles = import.meta.glob(['./monaco-editor/**/*.d.ts'], {
+  as: 'raw',
+  eager: true,
+})
 const extraModules = Object
-  .entries(awaitablerCodes)
+  .entries(Object.assign(
+    {},
+    awaitablerCodes,
+    fixDTSFiles
+  ))
   .reduce((acc, [filePath, content]) => acc.concat({
     filePath: filePath.replace(/^.*\/src/, '/node_modules/awaitabler'),
     content
