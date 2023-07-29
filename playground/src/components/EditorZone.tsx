@@ -253,6 +253,7 @@ export default function EditorZone() {
     searchParams.set('lang', lang)
     history.replaceState(null, '', '?' + searchParams.toString() + location.hash)
   }
+  const curFilePath = useMemo(() => `/index.${language}`, [language])
 
   const hash = location.hash.slice(1)
   const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : examples.base[language])
@@ -282,7 +283,7 @@ export default function EditorZone() {
     })
     return () => {
       monaco.editor.getModels().forEach(model => {
-        if (model.uri.path.startsWith('/node_modules/')) model.dispose()
+        if (model.uri.path !== curFilePath) model.dispose()
       })
     }
   }, [language, monaco])
@@ -446,7 +447,7 @@ export default function EditorZone() {
         }
       }}
       value={code}
-      path={`file:///index.${language}`}
+      path={`file://${curFilePath}`}
       onChange={e => setCode(e ?? '')}
       onMount={(editor, monaco) => {
         // @ts-ignore
