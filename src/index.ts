@@ -4,7 +4,7 @@ import { configure } from './configure'
 export default Self
 
 export * from './tags'
-export * from './quester'
+export * from './plugins/quester'
 
 const middlewares = new Set<Middleware>()
 
