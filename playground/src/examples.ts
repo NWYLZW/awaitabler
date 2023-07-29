@@ -113,5 +113,25 @@ export default {
     }
     main()
     `).trim()
+  },
+  'Make number awaitabler': {
+    js: trimIndentation(`
+    // try it, press \`(Ctrl|Cmd) + E\` to run
+    import 'awaitabler/prototypes/number'
+
+    async function main() {
+        setTimeout(() => console.log('500ms'), 500)
+        setTimeout(() => console.log('950ms'), 950)
+        await 51e1.ms
+        console.log('await 51e1.ms')
+        await 0.4.s
+        console.log('await 0.4.s')
+        await 200..ms
+        console.log('await 200..ms')
+    }
+
+    main()
+    `).trim(),
+    get ts() { return this.js },
   }
 }
