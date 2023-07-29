@@ -17,8 +17,7 @@ function updateTheme(mode?: typeof theme) {
   const theme = localStorage.getItem(THEME_STORE_KEY) ?? 'auto'
   if (theme !== 'auto') {
     mode = theme
-  }
-  else {
+  } else {
     if (mode === undefined) {
       const mediaQueryListDark = window.matchMedia('(prefers-color-scheme: dark)')
       mode = mediaQueryListDark.matches ? 'dark' : ''
@@ -28,8 +27,7 @@ function updateTheme(mode?: typeof theme) {
   curThemeMode = mode
   if (mode === 'dark') {
     document.documentElement.setAttribute('theme-mode', 'dark')
-  }
-  else {
+  } else {
     document.documentElement.removeAttribute('theme-mode')
   }
 }
