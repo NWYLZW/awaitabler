@@ -38,46 +38,49 @@ function addDisposeFunc(func?: Function) {
   }
 }
 
-window.addEventListener('message', e => {
-  switch (e.data.type) {
-    case 'run': {
-      let { code } = e.data
-      // noinspection FallThroughInSwitchStatementJS
-      switch (e.data.lang) {
-        // @ts-ignore
-        case 'typescript': {
-          const { code: transformCode } = Babel.transform(code, {
-            presets: ['typescript'],
-            plugins: [awaitAutoBox],
-            filename: 'index.ts'
-          }) ?? {}
-          code = transformCode
-        }
-        case 'javascript': {
-          const { code: transformCode } = Babel.transform(code, {
-            presets: ['es2015'],
-            plugins: [awaitAutoBox]
-          }) ?? {}
-          code = transformCode
-          break
-        }
-        default:
-          code = undefined
-      }
-      if (code === undefined) {
-        console.error('Unknown language')
-        return
-      }
-      try {
-        prevDisposeFunc?.()
-        addDisposeFunc(eval(
-          `(function () { const module = { exports: {} }; const exports = module.exports; ${code}; return module.exports; })()`
-        ).dispose)
-      } catch (e) {
-        console.error(e)
-      }
+function runCode(lang: string, originalCode: string) {
+  let code = originalCode
+  // noinspection FallThroughInSwitchStatementJS
+  switch (lang) {
+    // @ts-ignore
+    case 'typescript': {
+      const { code: transformCode } = Babel.transform(code, {
+        presets: ['typescript'],
+        plugins: [awaitAutoBox],
+        filename: 'index.ts'
+      }) ?? {}
+      code = transformCode ?? ''
+    }
+    case 'javascript': {
+      const { code: transformCode } = Babel.transform(code, {
+        presets: ['es2015'],
+        plugins: [awaitAutoBox]
+      }) ?? {}
+      code = transformCode ?? ''
       break
     }
+    default:
+      throw new Error(`Unknown language ${lang}`)
+  }
+  if (code === '') {
+    console.warn('Empty code')
+    return
+  }
+  try {
+    prevDisposeFunc?.()
+    addDisposeFunc(eval(
+      `(function () { const module = { exports: {} }; const exports = module.exports; ${code}; return module.exports; })()`
+    ).dispose)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+window.addEventListener('message', e => {
+  switch (e.data.type) {
+    case 'run':
+      runCode(e.data.lang, e.data.code)
+      break
     case 'update:localStorage': {
       const { key, data } = e.data
       localStorage.setItem(key, JSON.stringify(data))
