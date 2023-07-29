@@ -1,17 +1,39 @@
 import { safeChangePrototype } from './utils'
 
+type AbortablePromise<T> = Promise<T> & {
+  (abortSignal: AbortSignal): Promise<T>
+}
+
 declare global {
   interface Number {
-    ms: Promise<void>
-    s: Promise<void>
-    m: Promise<void>
-    h: Promise<void>
-    d: Promise<void>
+    ms: AbortablePromise<void>
+    s: AbortablePromise<void>
+    m: AbortablePromise<void>
+    h: AbortablePromise<void>
+    d: AbortablePromise<void>
   }
 }
 
 function sleep(ms: number) {
-  return new Promise<void>(re => setTimeout(re, ms))
+  let as: AbortSignal
+  const abortableFunc = (async _as => {
+    as = _as
+    return await abortableFunc
+  }) as AbortablePromise<void>
+  abortableFunc.then = (onfulfilled, onrejected) => {
+    return new Promise<void>((resolve, reject) => {
+      const t = setTimeout(resolve, ms)
+      as.addEventListener('abort', () => {
+        clearTimeout(t)
+        if (as.reason === null) {
+          resolve()
+        } else {
+          reject(as.reason)
+        }
+      })
+    }).then(onfulfilled, onrejected)
+  }
+  return abortableFunc
 }
 function isFiniteWrap(func: (this: Number) => Promise<void>) {
   return function (this: Number) {
