@@ -23,8 +23,8 @@ function updateTheme(mode?: typeof theme) {
       mode = mediaQueryListDark.matches ? 'dark' : ''
     }
   }
-  themeChangeListeners.forEach((listener) => listener(mode))
-  curThemeMode = mode
+  curThemeMode = mode || 'light'
+  themeChangeListeners.forEach((listener) => listener(curThemeMode))
   if (mode === 'dark') {
     document.documentElement.setAttribute('theme-mode', 'dark')
   } else {
