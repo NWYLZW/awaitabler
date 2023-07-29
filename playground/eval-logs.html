@@ -11,7 +11,8 @@
 <body>
 <script type="module" src='src/eval-logs.ts'></script>
 <script src="/target.js" embedded="true"></script>
-<script src="//cdn.jsdelivr.net/npm/sentinel-js"></script>
+<script src="//unpkg.com/sentinel-js"></script>
+<script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
 <script type="module">
   sentinel.on('.__chobitsu-hide__', _el => {
     const el = /** @type {HTMLDivElement} */ (_el)
