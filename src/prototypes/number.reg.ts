@@ -18,30 +18,49 @@ function isFiniteWrap(func: (this: Number) => Promise<void>) {
     return func.call(this)
   }
 }
-function defineProperty(prop: string, func: (this: Number) => Promise<void>) {
+function defineProperty(prop: string, func: (this: Number | BigInt) => Promise<void>) {
+  const wrapFunc = isFiniteWrap(func)
+
   // @ts-ignore
-  !Number.prototype[prop]
+  const cache00 = Number.prototype[prop]
+  !cache00
     && Object.defineProperty(Number.prototype, prop, {
       enumerable: false,
       configurable: false,
-      get: isFiniteWrap(func)
+      get: wrapFunc
     })
   // @ts-ignore
-  !BigInt.prototype[prop]
+  const cache10 = BigInt.prototype[prop]
+  !cache10
     && Object.defineProperty(BigInt.prototype, prop, {
       enumerable: false,
       configurable: false,
-      get: func
+      get: wrapFunc
     })
+  return () => {
+    // @ts-ignore
+    if (Number.prototype[prop] !== wrapFunc) {
+      // @ts-ignore
+      Number.prototype[prop] = cache00
+    }
+    // @ts-ignore
+    if (BigInt.prototype[prop] !== wrapFunc) {
+      // @ts-ignore
+      BigInt.prototype[prop] = cache10
+    }
+  }
 }
 export function defineSleepProp(prop: string, times: number) {
-  defineProperty(prop, function () { return sleep(Number(this) * times) })
+  return defineProperty(prop, function () { return sleep(Number(this) * times) })
 }
 
 export default function regNumber() {
-  defineSleepProp('ms', 1)
-  defineSleepProp('s', 1000)
-  defineSleepProp('m', 1000 * 60)
-  defineSleepProp('h', 1000 * 60 * 60)
-  defineSleepProp('d', 1000 * 60 * 60 * 24)
+  const disposeFuncs = [
+    defineSleepProp('ms', 1),
+    defineSleepProp('s', 1000),
+    defineSleepProp('m', 1000 * 60),
+    defineSleepProp('h', 1000 * 60 * 60),
+    defineSleepProp('d', 1000 * 60 * 60 * 24),
+  ]
+  return () => disposeFuncs.forEach(func => func())
 }

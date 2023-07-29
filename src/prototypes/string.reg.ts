@@ -65,7 +65,10 @@ export function resolveContext(str: string) {
 }
 
 export default function regString() {
-  global.StringFunction = str => (async (a0: unknown, ...args: unknown[]) => {
+  const This = global || window
+
+  const cache00 = This.StringFunction
+  This.StringFunction = str => (async (a0: unknown, ...args: unknown[]) => {
     if (Array.isArray(a0)) {
       // template literals mode
       // 'url'`${'123'}`
@@ -74,9 +77,22 @@ export default function regString() {
       // 'url'({})
     }
   }) as StringFunction
+  const cache01 = This.StringFunction
+
+  const cache10 = String.prototype.then
   String.prototype.then = function (on0, on1) {
     return consumeMiddlewares(
       resolveContext(this.toString())
     ).then(on0, on1)
+  }
+  const cache11 = String.prototype.then
+
+  return () => {
+    if (cache01 === This.StringFunction) {
+      This.StringFunction = cache00
+    }
+    if (cache11 === String.prototype.then) {
+      String.prototype.then = cache10
+    }
   }
 }
