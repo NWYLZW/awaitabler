@@ -15,7 +15,7 @@ declare global {
 }
 
 function sleep(ms: number) {
-  let as: AbortSignal
+  let as: AbortSignal | undefined
   const abortableFunc = (async _as => {
     as = _as
     return await abortableFunc
@@ -23,12 +23,12 @@ function sleep(ms: number) {
   abortableFunc.then = (onfulfilled, onrejected) => {
     return new Promise<void>((resolve, reject) => {
       const t = setTimeout(resolve, ms)
-      as.addEventListener('abort', () => {
+      as?.addEventListener('abort', () => {
         clearTimeout(t)
-        if (as.reason === null) {
+        if (as!.reason === null) {
           resolve()
         } else {
-          reject(as.reason)
+          reject(as!.reason)
         }
       })
     }).then(onfulfilled, onrejected)
