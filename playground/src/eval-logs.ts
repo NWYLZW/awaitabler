@@ -6,10 +6,6 @@ import * as AwaitablerNumber from 'awaitabler/prototypes/number.reg'
 
 import awaitAutoBox from 'awaitabler/await-auto-box'
 
-// console.log(import.meta.glob(['../src/**', '!../src/configure.ts', '!**/*.d.ts'], {
-//   as: 'url',
-//   eager: true,
-// }))
 // @ts-ignore
 window.require = function (name) {
   switch (name) {

@@ -12,8 +12,21 @@ import { CodeHistoryItem, useCodeHistory } from './EditorZone_CodeHistory.ts'
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
 
-// @ts-ignore
-const extraModules = EXTRA_MODULES as { content: string, filePath: string }[]
+const awaitablerCodes = import.meta.glob([
+  '../../../src/**',
+  '!../../../src/configure.ts',
+  '!**/*.d.ts',
+  '!**/tsconfig.json'
+], {
+  as: 'raw',
+  eager: true,
+})
+const extraModules = Object
+  .entries(awaitablerCodes)
+  .reduce((acc, [filePath, content]) => acc.concat({
+    filePath: filePath.replace(/^.*\/src/, '/node_modules/awaitabler'),
+    content
+  }), [] as { content: string, filePath: string }[])
 const compilerOptions: monacoEditor.languages.typescript.CompilerOptions = {
   moduleResolution: 2,
 }
