@@ -79,8 +79,15 @@ window.addEventListener('message', e => {
       break
     case 'update:localStorage': {
       const { key, data } = e.data
+      let isReload = true
+      if (key === 'uiTheme') {
+        const currentTheme = JSON.parse(localStorage.getItem('uiTheme') ?? '""')
+        if (currentTheme === data) {
+          isReload = false
+        }
+      }
       localStorage.setItem(key, JSON.stringify(data))
-      location.reload()
+      isReload && location.reload()
     }
   }
 })

@@ -9,7 +9,7 @@ declare global {
    * update iframe localStorage
    */
   export function updateLocalStorage(key: string, data: unknown): void
-  export function onThemeChange(fn: (theme: string) => void): void
+  export function onThemeChange(fn: (theme: string, isAuto: boolean) => void): void
 }
 
 export {}

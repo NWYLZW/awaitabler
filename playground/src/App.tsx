@@ -18,13 +18,9 @@ window.updateLocalStorage = function updateLocalStorage(key, data) {
 }
 
 function App() {
-  useEffect(() => onThemeChange(theme => updateLocalStorage(
-    'uiTheme', {
-      light: 'default',
-      dark: 'dark',
-      '': 'systemPreferred'
-    }[theme]
-  )), [])
+  useEffect(() => onThemeChange(theme => updateLocalStorage('uiTheme', {
+    light: 'default', dark: 'dark'
+  }[theme])), [])
   return (
     <>
       <header>

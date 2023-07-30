@@ -10,7 +10,7 @@ const themeChangeListeners: Function[] = []
 
 window.onThemeChange = function (listener) {
   themeChangeListeners.push(listener)
-  curThemeMode && listener(curThemeMode)
+  curThemeMode && listener(curThemeMode, curThemeMode === 'auto')
 }
 
 function updateTheme(mode?: typeof theme) {
@@ -24,7 +24,7 @@ function updateTheme(mode?: typeof theme) {
     }
   }
   curThemeMode = mode || 'light'
-  themeChangeListeners.forEach((listener) => listener(curThemeMode))
+  themeChangeListeners.forEach(listener => listener(curThemeMode, theme === 'auto'))
   if (mode === 'dark') {
     document.documentElement.setAttribute('theme-mode', 'dark')
   } else {
