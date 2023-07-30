@@ -343,6 +343,19 @@ export default function EditorZone() {
     code && history.pushState(null, '', '#' + btoa(encodeURIComponent(code)))
     location.reload()
   }, [realVersion])
+  const [loadError, setLoadError] = useState<string>()
+  useEffect(() => {
+    function onResourceLoadError(e: ErrorEvent) {
+      if (e.target instanceof HTMLScriptElement) {
+        const src = e.target.src
+        if (src.startsWith('https://typescript.azureedge.net/cdn/')) {
+          setLoadError(`TypeScript@${typescriptVersion} unavailable`)
+        }
+      }
+    }
+    window.addEventListener('error', onResourceLoadError, true)
+    return () => window.removeEventListener('error', onResourceLoadError)
+  }, [])
 
   const [theme, setTheme] = useState<string>('light')
   useEffect(() => onThemeChange(setTheme), [])
@@ -550,7 +563,9 @@ export default function EditorZone() {
               fontWeight: 'blob'
             }}>TS</span>
           </div>
-          <span>Downloading TypeScript@<code>{typescriptVersion}</code> ...</span>
+          {loadError
+            ? <span>{loadError}</span>
+            : <span>Downloading TypeScript@<code>{typescriptVersion}</code> ...</span>}
         </div>}
         path={`file://${curFilePath}`}
         value={code}
