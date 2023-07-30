@@ -330,7 +330,9 @@ export default function EditorZone() {
     }
   }, [language, monaco])
 
-  const realVersion = distTagEnumMemo?.[typescriptVersion] ?? typescriptVersion
+  const realVersion = isNeedCheckFetching
+    ? distTagEnumMemo?.[typescriptVersion]
+    : typescriptVersion
   loader.config({
     paths: { vs: `https://typescript.azureedge.net/cdn/${realVersion}/monaco/min/vs` }
   })
