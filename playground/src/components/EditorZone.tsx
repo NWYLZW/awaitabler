@@ -1,6 +1,14 @@
 import './EditorZone.scss'
 
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useMemo, useLayoutEffect } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+  useLayoutEffect
+} from 'react'
 import { createPortal } from 'react-dom'
 import type * as monacoEditor from 'monaco-editor'
 import loader from '@monaco-editor/loader'
@@ -264,7 +272,7 @@ export default function EditorZone() {
   }
 
   const {
-    data, fetching, error, reFetch
+    data, fetching, error
   } = useDistTags()
   const distTagsMemo = useMemo(() => {
     return (error !== null && !!data) ? data : null
@@ -286,8 +294,6 @@ export default function EditorZone() {
     return typescriptVersionMeta.suggestedVersions.indexOf(typescriptVersion) === -1;
   }, [typescriptVersion])
 
-  // console.log(distTagEnumMemo, distCategoryMemo, isNeedCheckFetching)
-
   const hash = location.hash.slice(1)
   const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : examples.base[language])
 
@@ -296,14 +302,6 @@ export default function EditorZone() {
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor>(null)
   const effectFuncs = useRef<Function[]>([])
 
-  useLayoutEffect(() => {
-    const realVersion = distTagEnumMemo
-      ?.[typescriptVersion]
-      ?? typescriptVersion
-    loader.config({
-      paths: { vs: `https://typescript.azureedge.net/cdn/${realVersion}/monaco/min/vs` }
-    })
-  }, [typescriptVersion, distTagsMemo])
   const monaco = useMonaco()
   useEffect(() => {
     if (!monaco) return
@@ -332,6 +330,14 @@ export default function EditorZone() {
       })
     }
   }, [language, monaco])
+  useLayoutEffect(() => {
+    const realVersion = distTagEnumMemo?.[typescriptVersion]
+      ?? typescriptVersion
+    // monaco
+    loader.config({
+      paths: { vs: `https://typescript.azureedge.net/cdn/${realVersion}/monaco/min/vs` }
+    })
+  }, [distTagEnumMemo, typescriptVersion])
 
   let innerTheme = 'light'
   useEffect(() => onThemeChange(theme => {
@@ -508,6 +514,7 @@ export default function EditorZone() {
     {isNeedCheckFetching && fetching
       ? <div className='fetching'>Fetching...</div>
       : <Editor
+        key={typescriptVersion}
         language={{
           js: 'javascript',
           ts: 'typescript',
