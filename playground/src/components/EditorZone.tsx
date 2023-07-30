@@ -529,6 +529,29 @@ export default function EditorZone() {
           }
         }}
         theme={theme === 'light' ? 'vs' : 'vs-dark'}
+        loading={<div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+        }}>
+          <div style={{
+            position: 'relative',
+            width: 72,
+            height: 72,
+            backgroundColor: '#4272ba',
+            userSelect: 'none'
+          }} >
+            <span style={{
+              position: 'absolute',
+              right: 5,
+              bottom: -2,
+              fontSize: 30,
+              fontWeight: 'blob'
+            }}>TS</span>
+          </div>
+          <span>Downloading TypeScript@<code>{typescriptVersion}</code> ...</span>
+        </div>}
         path={`file://${curFilePath}`}
         value={code}
         onChange={e => setCode(e ?? '')}
