@@ -18,10 +18,12 @@
     "@monaco-editor/react": "^4.5.1",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
+    "@types/semver": "^7.5.0",
     "@vitejs/plugin-react": "^4.0.1",
     "monaco-editor": "^0.40.0",
     "rollup-plugin-visualizer": "^5.9.2",
     "sass": "^1.64.0",
+    "semver": "^7.5.4",
     "vite": "^4.4.0",
     "vite-plugin-externals": "^0.6.2",
     "vite-tsconfig-paths": "^4.2.0"

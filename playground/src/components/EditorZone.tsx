@@ -9,6 +9,7 @@ import Editor, { useMonaco } from '@monaco-editor/react'
 import examples from '../examples.ts'
 import Switcher from './Switcher.tsx'
 import { CodeHistoryItem, useCodeHistory } from './EditorZone_CodeHistory.ts'
+import { typescriptVersionMeta, useDistTags } from './editor.typescript.versions.ts'
 
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
@@ -254,13 +255,38 @@ export default function EditorZone() {
   const curFilePath = useMemo(() => `/index.${language}`, [language])
 
   const [typescriptVersion, setTypescriptVersion] = useState<string>(
-    searchParams.get('ts') ?? '5.2.0-beta'
+    searchParams.get('ts') ?? typescriptVersionMeta.versions[0]
   )
   function changeTypescriptVersion(ts: string) {
     setTypescriptVersion(ts)
     searchParams.set('ts', ts)
     history.replaceState(null, '', '?' + searchParams.toString() + location.hash)
   }
+
+  const {
+    data, fetching, error, reFetch
+  } = useDistTags()
+  const distTagsMemo = useMemo(() => {
+    return (error !== null && !!data) ? data : null
+  }, [data, error])
+  const distTagEnumMemo = useMemo(() => {
+    return distTagsMemo
+      ? Object.fromEntries(
+        Object.entries(distTagsMemo).flatMap(([key, value]) => [[key, value], [value, key]])
+      )
+      : typescriptVersionMeta.distTagEnum
+  }, [data])
+  const distCategoryMemo = useMemo(() => {
+    return distTagsMemo
+      ? Object.keys(distTagsMemo)
+      : typescriptVersionMeta.distCategory
+  }, [distTagsMemo])
+  const isNeedCheckFetching = useMemo(() => {
+    // 不在推荐的版本中，说明是 dist tags 模式
+    return typescriptVersionMeta.suggestedVersions.indexOf(typescriptVersion) === -1;
+  }, [typescriptVersion])
+
+  // console.log(distTagEnumMemo, distCategoryMemo, isNeedCheckFetching)
 
   const hash = location.hash.slice(1)
   const [code, setCode] = useState<string>(hash ? decodeURIComponent(atob(hash)) : examples.base[language])
@@ -271,10 +297,13 @@ export default function EditorZone() {
   const effectFuncs = useRef<Function[]>([])
 
   useLayoutEffect(() => {
+    const realVersion = distTagEnumMemo
+      ?.[typescriptVersion]
+      ?? typescriptVersion
     loader.config({
-      paths: { vs: `https://typescript.azureedge.net/cdn/${typescriptVersion}/monaco/min/vs` }
+      paths: { vs: `https://typescript.azureedge.net/cdn/${realVersion}/monaco/min/vs` }
     })
-  }, [typescriptVersion])
+  }, [typescriptVersion, distTagsMemo])
   const monaco = useMonaco()
   useEffect(() => {
     if (!monaco) return
@@ -447,32 +476,61 @@ export default function EditorZone() {
                     changeLanguage(checked ? 'js' : 'ts')
                   }}
         />
+        <select
+          value={typescriptVersion}
+          onChange={e => changeTypescriptVersion(e.target.value)}
+        >
+          <optgroup label={'Suggested versions'}>
+            {typescriptVersionMeta.suggestedVersions.map(version => (
+              <option key={version} value={version}>{
+                version
+                + (distTagEnumMemo[version] ? ` (${distTagEnumMemo[version]})` : '')
+              }</option>
+            ))}
+          </optgroup>
+          <option value='' disabled>——————————</option>
+          <optgroup label={'Other versions'}>
+            {distCategoryMemo
+              .map(version => (
+                <option key={version}
+                        value={version}
+                        title={`${version} (${distTagEnumMemo[version]})`}
+                >{
+                  version.length > 15
+                    ? version.slice(0, 12) + '...'
+                    : version
+                }</option>
+              ))}
+          </optgroup>
+        </select>
       </div>
     </div>
-    <Editor
-      language={{
-        js: 'javascript',
-        ts: 'typescript',
-      }[language]}
-      options={{
-        automaticLayout: true,
-        scrollbar: {
-          vertical: 'hidden',
-          verticalSliderSize: 0,
-          verticalScrollbarSize: 0,
-        }
-      }}
-      value={code}
-      path={`file://${curFilePath}`}
-      onChange={e => setCode(e ?? '')}
-      onMount={(editor, monaco) => {
-        // @ts-ignore
-        editorRef.current = editor
-        editorRef.current.updateOptions({
-          theme: innerTheme === 'light' ? 'vs' : 'vs-dark'
-        })
-        addCommands(editor, monaco, code => codeHistoryDispatch({ type: 'add', code }))
-      }}
-    />
+    {isNeedCheckFetching && fetching
+      ? <div className='fetching'>Fetching...</div>
+      : <Editor
+        language={{
+          js: 'javascript',
+          ts: 'typescript',
+        }[language]}
+        options={{
+          automaticLayout: true,
+          scrollbar: {
+            vertical: 'hidden',
+            verticalSliderSize: 0,
+            verticalScrollbarSize: 0,
+          }
+        }}
+        value={code}
+        path={`file://${curFilePath}`}
+        onChange={e => setCode(e ?? '')}
+        onMount={(editor, monaco) => {
+          // @ts-ignore
+          editorRef.current = editor
+          editorRef.current.updateOptions({
+            theme: innerTheme === 'light' ? 'vs' : 'vs-dark'
+          })
+          addCommands(editor, monaco, code => codeHistoryDispatch({ type: 'add', code }))
+        }}
+      />}
   </div>
 }
