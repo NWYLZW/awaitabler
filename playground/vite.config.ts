@@ -46,6 +46,11 @@ export default defineConfig(async env => {
         'react-dom': 'ReactDOM',
       }) : null
     ],
+    // resolve: {
+    //   alias: {
+    //     '@monaco-editor/loader': '@monaco-editor/loader/lib/es/index.js',
+    //   }
+    // },
     build: {
       rollupOptions: {
         input: {

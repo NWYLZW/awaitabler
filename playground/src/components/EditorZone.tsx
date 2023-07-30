@@ -6,8 +6,7 @@ import {
   useState,
   forwardRef,
   useImperativeHandle,
-  useMemo,
-  useLayoutEffect
+  useMemo
 } from 'react'
 import { createPortal } from 'react-dom'
 import type * as monacoEditor from 'monaco-editor'
@@ -330,22 +329,21 @@ export default function EditorZone() {
       })
     }
   }, [language, monaco])
-  useLayoutEffect(() => {
-    const realVersion = distTagEnumMemo?.[typescriptVersion]
-      ?? typescriptVersion
-    // monaco
-    loader.config({
-      paths: { vs: `https://typescript.azureedge.net/cdn/${realVersion}/monaco/min/vs` }
-    })
-  }, [distTagEnumMemo, typescriptVersion])
 
-  let innerTheme = 'light'
-  useEffect(() => onThemeChange(theme => {
-    editorRef.current?.updateOptions({
-      theme: theme === 'light' ? 'vs' : 'vs-dark'
-    })
-    innerTheme = theme
-  }), [])
+  const realVersion = distTagEnumMemo?.[typescriptVersion] ?? typescriptVersion
+  loader.config({
+    paths: { vs: `https://typescript.azureedge.net/cdn/${realVersion}/monaco/min/vs` }
+  })
+  useEffect(() => {
+    if (!editorRef.current) return
+
+    const code = editorRef.current.getValue()
+    code && history.pushState(null, '', '#' + btoa(encodeURIComponent(code)))
+    location.reload()
+  }, [realVersion])
+
+  const [theme, setTheme] = useState<string>('light')
+  useEffect(() => onThemeChange(setTheme), [])
 
   const helpDialogRef = useRef<DialogRef>(null)
   const historyDialogRef = useRef<DialogRef>(null)
@@ -527,15 +525,13 @@ export default function EditorZone() {
             verticalScrollbarSize: 0,
           }
         }}
-        value={code}
+        theme={theme === 'light' ? 'vs' : 'vs-dark'}
         path={`file://${curFilePath}`}
+        value={code}
         onChange={e => setCode(e ?? '')}
         onMount={(editor, monaco) => {
           // @ts-ignore
           editorRef.current = editor
-          editorRef.current.updateOptions({
-            theme: innerTheme === 'light' ? 'vs' : 'vs-dark'
-          })
           addCommands(editor, monaco, code => codeHistoryDispatch({ type: 'add', code }))
         }}
       />}
