@@ -133,5 +133,24 @@ export default {
     main()
     `).trim(),
     get ts() { return this.js },
+  },
+  'Make `await <number>` abortable': {
+    js: trimIndentation(`
+    // try it, press \`(Ctrl|Cmd) + E\` to run
+    import 'awaitabler/prototypes/number'
+
+    async function main() {
+        const ac = new AbortController()
+        setTimeout(() => ac.abort(null), 100)
+        setTimeout(() => console.log('50ms'), 50)
+        setTimeout(() => console.log('200ms'), 200)
+        setTimeout(() => console.log('1s'), 1000)
+        console.log('await 1..s(ac) start')
+        await 1..s(ac.signal)
+        console.log('await 1..s(ac) end')
+    }
+    main()
+    `).trim(),
+    get ts() { return this.js },
   }
 }

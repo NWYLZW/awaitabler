@@ -446,6 +446,7 @@ export default function EditorZone() {
           <option value='await.opts'>控制流</option>
           <option value='middleware'>中间件</option>
           <option value='Make number awaitabler'>数字也可以！</option>
+          <option value='Make `await <number>` abortable'>终止对数字的等待</option>
         </select>
         <Switcher lText={<div style={{ position: 'relative', width: 24, height: 24, backgroundColor: '#4272ba' }} >
                     <span style={{
