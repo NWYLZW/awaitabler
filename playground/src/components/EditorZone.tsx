@@ -267,7 +267,11 @@ export default function EditorZone() {
   function changeTypescriptVersion(ts: string) {
     setTypescriptVersion(ts)
     searchParams.set('ts', ts)
-    history.replaceState(null, '', '?' + searchParams.toString() + location.hash)
+    const code = editorRef.current?.getValue()
+    const hash = code ? '#' + btoa(encodeURIComponent(code)) : ''
+    history.replaceState(null, '', '?' + searchParams.toString() + hash)
+    // TODO refactor no reload
+    location.reload()
   }
 
   const {
@@ -336,13 +340,6 @@ export default function EditorZone() {
   loader.config({
     paths: { vs: `https://typescript.azureedge.net/cdn/${realVersion}/monaco/min/vs` }
   })
-  useEffect(() => {
-    if (!editorRef.current) return
-
-    const code = editorRef.current.getValue()
-    code && history.pushState(null, '', '#' + btoa(encodeURIComponent(code)))
-    location.reload()
-  }, [realVersion])
   const [loadError, setLoadError] = useState<string>()
   useEffect(() => {
     function onResourceLoadError(e: ErrorEvent) {
