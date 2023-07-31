@@ -65,16 +65,6 @@ function addCommands(
     history.pushState(null, '', '#' + btoa(encodeURIComponent(code)))
     copyToClipboard(location.href)
     editor.focus()
-    const model = editor.getModel()
-    if (model) {
-      // get compiled code
-      monaco.languages.typescript.getTypeScriptWorker()
-        .then(worker => worker(model.uri))
-        .then(client => client.getEmitOutput(model.uri.toString()))
-        .then(result => {
-          evalLogsBridge.send('compile-completed', result.outputFiles)
-        })
-    }
     addHistory(code)
   })
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE, function () {
@@ -346,6 +336,17 @@ export default function EditorZone() {
       })
     }
   }, [language, monaco])
+  useEffect(() => {
+    const model = editorRef.current?.getModel()
+    if (model) {
+      monaco?.languages.typescript.getTypeScriptWorker()
+        .then(worker => worker(model.uri))
+        .then(client => client.getEmitOutput(model.uri.toString()))
+        .then(result => {
+          evalLogsBridge.send('compile-completed', result.outputFiles)
+        })
+    }
+  }, [editorRef?.current, monaco, code])
 
   const realVersion = isNeedCheckFetching
     ? distTagEnumMemo?.[typescriptVersion]
@@ -587,7 +588,7 @@ export default function EditorZone() {
         </div>}
         path={`file://${curFilePath}`}
         value={code}
-        onChange={e => setCode(e ?? '')}
+        onChange={code => setCode(code ?? '')}
         onMount={(editor, monaco) => {
           // @ts-ignore
           editorRef.current = editor
