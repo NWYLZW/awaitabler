@@ -6,6 +6,10 @@ class JSOutput extends UI.Widget.Widget {
   constructor() {
     super()
     const text = document.createElement('pre')
+    text.style.cursor = 'text'
+    text.style.userSelect = 'text'
+    text.style.whiteSpace = 'pre-wrap'
+    text.style.margin = '0'
     text.innerText = ''
     const [FILES, onFiles] = getFiles()
     function update(files = FILES) {
