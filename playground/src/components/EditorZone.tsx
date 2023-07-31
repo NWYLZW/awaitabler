@@ -498,12 +498,19 @@ export default function EditorZone() {
           onChange={e => changeTypescriptVersion(e.target.value)}
         >
           <optgroup label={'Suggested versions'}>
-            {typescriptVersionMeta.suggestedVersions.map(version => (
-              <option key={version} value={version}>{
-                version
+            {typescriptVersionMeta.suggestedVersions.map(version => {
+              const displayVersion = (version === '3.3.3333'
+                ? '3.3.3'
+                : version === '3.3.4000'
+                  ? '3.3.4'
+                  : version)
                 + (distTagEnumMemo[version] ? ` (${distTagEnumMemo[version]})` : '')
+              return <option key={version} value={version} title={displayVersion}>{
+                displayVersion.length > 15
+                  ? displayVersion.slice(0, 12) + '...'
+                  : displayVersion
               }</option>
-            ))}
+            })}
           </optgroup>
           <option value='' disabled>——————————</option>
           <optgroup label={'Other versions'}>
