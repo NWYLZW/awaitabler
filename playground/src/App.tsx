@@ -4,17 +4,14 @@ import { useEffect } from 'react'
 
 import EditorZone from './components/EditorZone'
 import { ThemeSwitcher } from './components/ThemeSwitcher.tsx'
+import { evalLogsBridge } from './eval-logs-bridge.ts'
 
-window.dododo = function dododo(code, lang) {
-  document.querySelector<HTMLIFrameElement>('iframe.eval-logs')
-    ?.contentWindow
-    ?.postMessage({ type: 'run', code, lang }, '*')
+window.dododo = function dododo() {
+  evalLogsBridge.send('run')
 }
 
 window.updateLocalStorage = function updateLocalStorage(key, data) {
-  document.querySelector<HTMLIFrameElement>('iframe.eval-logs')
-    ?.contentWindow
-    ?.postMessage({ type: 'update:localStorage', key, data }, '*')
+  evalLogsBridge.send('update:localStorage', [key, data])
 }
 
 function App() {

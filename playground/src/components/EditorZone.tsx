@@ -17,6 +17,7 @@ import examples from '../examples.ts'
 import Switcher from './Switcher.tsx'
 import { CodeHistoryItem, useCodeHistory } from './EditorZone_CodeHistory.ts'
 import { typescriptVersionMeta, useDistTags } from './editor.typescript.versions.ts'
+import { evalLogsBridge } from '../eval-logs-bridge.ts'
 
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
@@ -64,6 +65,16 @@ function addCommands(
     history.pushState(null, '', '#' + btoa(encodeURIComponent(code)))
     copyToClipboard(location.href)
     editor.focus()
+    const model = editor.getModel()
+    if (model) {
+      // get compiled code
+      monaco.languages.typescript.getTypeScriptWorker()
+        .then(worker => worker(model.uri))
+        .then(client => client.getEmitOutput(model.uri.toString()))
+        .then(result => {
+          evalLogsBridge.send('compile-completed', result.outputFiles)
+        })
+    }
     addHistory(code)
   })
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE, function () {

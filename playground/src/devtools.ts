@@ -1,13 +1,19 @@
 import * as UI from '//chii/ui/legacy/legacy.js'
 
+import { getFiles } from './eval-logs-FILES.ts'
+
 class Output extends UI.Widget.Widget {
   constructor() {
     super()
     const text = document.createElement('pre')
     text.innerText = 'no Output'
-    window.onOutPutCodeChange((code: string) => {
-      code && (this.contentElement.innerText = code)
-    })
+    const [FILES, onFiles] = getFiles()
+    function update(files = FILES) {
+      text.innerText = files.map(({ name, text }) => `// @filename:${name}\n${text}`).join('\n\n')
+    }
+    update()
+    onFiles(update)
+    this.contentElement.appendChild(text)
   }
 }
 

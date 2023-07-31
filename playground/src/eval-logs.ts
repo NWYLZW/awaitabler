@@ -1,10 +1,9 @@
-import * as Babel from '@babel/standalone'
-
 import * as Awaitabler from 'awaitabler'
 import * as AwaitablerString from 'awaitabler/prototypes/string.reg'
 import * as AwaitablerNumber from 'awaitabler/prototypes/number.reg'
 
-import awaitAutoBox from 'awaitabler/await-auto-box'
+import { evalLogsBridge } from './eval-logs-bridge.ts'
+import { FILES } from './eval-logs-FILES.ts'
 
 // @ts-ignore
 window.require = function (name) {
@@ -34,72 +33,27 @@ function addDisposeFunc(func?: Function) {
   }
 }
 
-let outputCode = ''
-const listeners: Function[] = []
-window.setOutPutCode = function (code: string) {
-  outputCode = code
-  listeners.forEach(func => func(code))
-}
-window.onOutPutCodeChange = function (func: Function) {
-  listeners.push(func)
-  func(outputCode)
-}
-
-function runCode(lang: string, originalCode: string) {
-  let code = originalCode
-  // noinspection FallThroughInSwitchStatementJS
-  switch (lang) {
-    // @ts-ignore
-    case 'typescript': {
-      const { code: transformCode } = Babel.transform(code, {
-        presets: ['typescript'],
-        plugins: [awaitAutoBox],
-        filename: 'index.ts'
-      }) ?? {}
-      code = transformCode ?? ''
+evalLogsBridge.on('run', () => {
+  FILES.forEach(({ name, text: code }) => {
+    // TODO support fileSystem
+    try {
+      prevDisposeFunc?.()
+      addDisposeFunc(eval(
+        `(function () { const module = { exports: {} }; const exports = module.exports; ${code}; return module.exports; })()`
+      ).dispose)
+    } catch (e) {
+      console.error(e)
     }
-    case 'javascript': {
-      const { code: transformCode } = Babel.transform(code, {
-        presets: ['es2015'],
-        plugins: [awaitAutoBox]
-      }) ?? {}
-      code = transformCode ?? ''
-      break
-    }
-    default:
-      throw new Error(`Unknown language ${lang}`)
-  }
-  if (code === '') {
-    console.warn('Empty code')
-    return
-  }
-  try {
-    prevDisposeFunc?.()
-    window.setOutPutCode(code)
-    addDisposeFunc(eval(
-      `(function () { const module = { exports: {} }; const exports = module.exports; ${code}; return module.exports; })()`
-    ).dispose)
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-window.addEventListener('message', e => {
-  switch (e.data.type) {
-    case 'run':
-      runCode(e.data.lang, e.data.code)
-      break
-    case 'update:localStorage': {
-      const { key, data } = e.data
-      let isReload = true
-      if (key === 'uiTheme') {
-        const currentTheme = JSON.parse(localStorage.getItem('uiTheme') ?? '""')
-        if (currentTheme === data) {
-          isReload = false
-        }
-      }
-      localStorage.setItem(key, JSON.stringify(data))
-      isReload && location.reload()
+  })
+})
+evalLogsBridge.on('update:localStorage', ([key, value]) => {
+  let isReload = true
+  if (key === 'uiTheme') {
+    const currentTheme = JSON.parse(localStorage.getItem('uiTheme') ?? '""')
+    if (currentTheme === value) {
+      isReload = false
     }
   }
+  localStorage.setItem(key, JSON.stringify(value))
+  isReload && location.reload()
 })
