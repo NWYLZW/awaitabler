@@ -18,13 +18,13 @@ describe('Await Auto Box', function () {
         .readFileSync(path.resolve(__dirname,
           `./examples/${caseName}.output.js`
         ), 'utf-8').trim()
-      const { code } = transformSync(fileContent, { plugins: [awaitAutoBox] })
+      const { code } = transformSync(fileContent, { plugins: [awaitAutoBox] }) ?? {}
       expect(code).to.equal(outputFileContent)
     }
   })
   it('test', () => {
     console.log(
-      transformSync(`await (Promise.reject(1) || 'u0')`, { plugins: [awaitAutoBox] }).code
+      transformSync(`await (Promise.reject(1) || 'u0')`, { plugins: [awaitAutoBox] })?.code
     )
   })
 })
