@@ -67,6 +67,7 @@ export function resolveContext(str: string) {
 }
 
 export default function regString() {
+  var global
   const This = global || window
 
   const cache00 = This.StringFunction
