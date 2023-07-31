@@ -153,8 +153,9 @@ export const HelpDialog = forwardRef<DialogRef>(function HelpDialog({ }, ref) {
 })
 
 export const HistoryDialog = forwardRef<DialogRef, {
+  theme: string
   onChange?: (codeHistory: CodeHistoryItem) => void
-}>(function HistoryDialog({ onChange }, ref) {
+}>(function HistoryDialog({ theme, onChange }, ref) {
   const [open, setOpen] = useState(false)
   useImperativeHandle(ref, () => ({
     open: () => setOpen(true),
@@ -216,7 +217,7 @@ export const HistoryDialog = forwardRef<DialogRef, {
         <span><code>Enter</code>(确认)</span>
         <button className='dialog__close' onClick={() => setOpen(false)}>×</button>
       </div>
-      <div className='dialog__content'>
+      {open && <div className='dialog__content'>
         <div className='history__list'>
           {historyList.map((item, index) => (
             <div
@@ -234,6 +235,7 @@ export const HistoryDialog = forwardRef<DialogRef, {
           <Editor
             height='100%'
             width='100%'
+            theme={theme === 'light' ? 'vs' : 'vs-dark'}
             language='javascript'
             value={history?.code ?? ''}
             options={{
@@ -243,7 +245,7 @@ export const HistoryDialog = forwardRef<DialogRef, {
             }}
           />
         </div>
-      </div>
+      </div>}
     </div>
   </dialog>, document.body, 'history-dialog')
 })
@@ -421,6 +423,7 @@ export default function EditorZone() {
               }}>
     <HelpDialog ref={helpDialogRef} />
     <HistoryDialog
+      theme={theme}
       ref={historyDialogRef}
       onChange={ch => setCode(ch.code)}
     />

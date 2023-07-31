@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useReducer, useSyncExternalStore } from 'react'
 
 export interface CodeHistoryItem {
   code: string
@@ -54,5 +54,8 @@ export function useCodeHistory() {
   useEffect(() => {
     setCodeHistory(data)
   }, [data])
-  return [data, dispatch] as const
+  return [
+    useMemo(() => [...data].reverse(), [data]),
+    dispatch
+  ] as const
 }
