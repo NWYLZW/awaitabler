@@ -68,19 +68,7 @@ function addCommands(
     addHistory(code)
   })
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE, function () {
-    const code = editor.getValue().trim()
-    if (code === '') return
-
-    const extension = editor.getModel()?.uri.path.split('.').pop()
-    const type = {
-      js: 'javascript',
-      ts: 'typescript',
-      // TODO support jsx and tsx
-      // jsx: 'javascriptXML',
-      // tsx: 'typescriptXML',
-    }[extension!]
-    type
-      && dododo(code, type)
+    evalLogsBridge.send('run')
   })
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow, function () {
     // 当光标位于第一行时触发
@@ -441,12 +429,9 @@ export default function EditorZone() {
     />
     <div className='menu'>
       <div className='btns'>
-        <button className='excute' onClick={() => {
-          const code = editorRef.current?.getValue().trim()
-          if (code === '' || code === undefined) return
-
-          dododo(code, language === 'js' ? 'javascript' : 'typescript')
-        }}>Execute</button>
+        <button className='excute' onClick={() => evalLogsBridge.send('run')}>
+          Execute
+        </button>
         <button className='history' onClick={() => historyDialogRef.current?.open()}>
           History
         </button>

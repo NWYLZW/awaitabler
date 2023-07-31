@@ -6,18 +6,10 @@ import EditorZone from './components/EditorZone'
 import { ThemeSwitcher } from './components/ThemeSwitcher.tsx'
 import { evalLogsBridge } from './eval-logs-bridge.ts'
 
-window.dododo = function dododo() {
-  evalLogsBridge.send('run')
-}
-
-window.updateLocalStorage = function updateLocalStorage(key, data) {
-  evalLogsBridge.send('update:localStorage', [key, data])
-}
-
 function App() {
-  useEffect(() => onThemeChange(theme => updateLocalStorage('uiTheme', {
+  useEffect(() => onThemeChange(theme => evalLogsBridge.send('update:localStorage', ['uiTheme', {
     light: 'default', dark: 'dark'
-  }[theme])), [])
+  }[theme]])), [])
   return (
     <>
       <header>
