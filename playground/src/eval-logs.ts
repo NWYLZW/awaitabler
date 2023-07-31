@@ -34,6 +34,17 @@ function addDisposeFunc(func?: Function) {
   }
 }
 
+let outputCode = ''
+const listeners: Function[] = []
+window.setOutPutCode = function (code: string) {
+  outputCode = code
+  listeners.forEach(func => func(code))
+}
+window.onOutPutCodeChange = function (func: Function) {
+  listeners.push(func)
+  func(outputCode)
+}
+
 function runCode(lang: string, originalCode: string) {
   let code = originalCode
   // noinspection FallThroughInSwitchStatementJS
@@ -64,6 +75,7 @@ function runCode(lang: string, originalCode: string) {
   }
   try {
     prevDisposeFunc?.()
+    window.setOutPutCode(code)
     addDisposeFunc(eval(
       `(function () { const module = { exports: {} }; const exports = module.exports; ${code}; return module.exports; })()`
     ).dispose)
@@ -91,16 +103,3 @@ window.addEventListener('message', e => {
     }
   }
 })
-
-initChii: (() => {
-  localStorage.setItem('chii-embedded-height', JSON.stringify(10000))
-
-  localStorage.setItem('panel-selectedTab', JSON.stringify('console'))
-  localStorage.setItem(
-    "viewsLocationOverride",
-    JSON.stringify({ resources: "none", elements: "none", network: "none", sources: "none" }),
-  )
-  localStorage.setItem("consoleShowSettingsToolbar", JSON.stringify(false))
-
-  localStorage.setItem('textEditorIndent', JSON.stringify('  '))
-})()

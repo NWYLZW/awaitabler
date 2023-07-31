@@ -20,7 +20,8 @@
 
     "paths": {
       "awaitabler": ["./src"],
-      "awaitabler/*": ["./src/*"]
+      "awaitabler/*": ["./src/*"],
+      "//chii/*": ["./playground/external/devtools-frontend/front_end/*"],
     }
   },
   "include": ["src", "./playground/src", "scripts/build.ts"],

@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script type='importmap'>
+    {
+      "imports": {
+        "//chii/": "//cdn.jsdelivr.net/npm/chii/public/front_end/"
+      }
+    }
+  </script>
   <meta charset="UTF-8">
   <title>Eval Logs</title>
   <style type="text/css">
@@ -10,6 +17,7 @@
 </head>
 <body>
 <script type="module" src='src/eval-logs.ts'></script>
+<script type="module" src='src/devtools.ts'></script>
 <script src="/target.js" embedded="true"></script>
 <script src="//unpkg.com/sentinel-js"></script>
 <script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
