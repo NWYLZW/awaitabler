@@ -2,14 +2,14 @@ import * as UI from '//chii/ui/legacy/legacy.js'
 
 import { getFiles } from './eval-logs-FILES.ts'
 
-class Output extends UI.Widget.Widget {
+class JSOutput extends UI.Widget.Widget {
   constructor() {
     super()
     const text = document.createElement('pre')
-    text.innerText = 'no Output'
+    text.innerText = ''
     const [FILES, onFiles] = getFiles()
     function update(files = FILES) {
-      text.innerText = files.map(({ name, text }) => `// @filename:${name}\n${text}`).join('\n\n')
+      text.innerText = files.map(({ name, originalText }) => `// @filename:${name}\n${originalText}`).join('\n\n')
     }
     update()
     onFiles(update)
@@ -33,8 +33,8 @@ initChii: (async () => {
     // @ts-ignore
     const chiiWidget = devtools.querySelector('.vbox.flex-auto.split-widget')?.__widget
     if (chiiWidget) {
-      const { sidebarWidgetInternal: { tabbedPane } } = chiiWidget
-      tabbedPane.appendTab('output', 'Output', new Output())
+      const tabbedPane = chiiWidget.sidebarWidgetInternal.tabbedPane
+      tabbedPane.appendTab('.js', '.JS', new JSOutput())
     }
   }
   if (devtools.readyState === 'complete') {
