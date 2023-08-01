@@ -38,11 +38,13 @@ async function checkInspectorViewIsLoaded() {
     init(realUI, inspectorView)
   }
 }
-if (devtoolsDocument.readyState === 'complete') {
-  await checkInspectorViewIsLoaded()
-} else {
-  devtoolsDocument.addEventListener('load', checkInspectorViewIsLoaded, true)
-}
+;(async () => {
+  if (devtoolsDocument.readyState === 'complete') {
+    await checkInspectorViewIsLoaded()
+  } else {
+    devtoolsDocument.addEventListener('load', checkInspectorViewIsLoaded, true)
+  }
+})()
 
 function init(realUI: typeof UI, inspectorView: UI.InspectorView.InspectorView) {
   const tabbedPane = inspectorView?.tabbedPane
