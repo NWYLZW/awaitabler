@@ -4,10 +4,10 @@ import { useEffect } from 'react'
 
 import EditorZone from './components/EditorZone'
 import { ThemeSwitcher } from './components/ThemeSwitcher.tsx'
-import { evalLogsBridge } from './eval-logs-bridge.ts'
+import { elBridgeP } from './eval-logs-bridge.ts'
 
 function App() {
-  useEffect(() => onThemeChange(theme => evalLogsBridge.send('update:localStorage', ['uiTheme', {
+  useEffect(() => onThemeChange(theme => elBridgeP.send('update:localStorage', ['uiTheme', {
     light: 'default', dark: 'dark'
   }[theme]])), [])
   return (

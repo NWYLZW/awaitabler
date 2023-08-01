@@ -17,7 +17,7 @@ import examples from '../examples.ts'
 import Switcher from './Switcher.tsx'
 import { CodeHistoryItem, useCodeHistory } from './EditorZone_CodeHistory.ts'
 import { typescriptVersionMeta, useDistTags } from './editor.typescript.versions.ts'
-import { evalLogsBridge } from '../eval-logs-bridge.ts'
+import { elBridgeP } from '../eval-logs-bridge.ts'
 
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
@@ -67,9 +67,7 @@ function addCommands(
     editor.focus()
     addHistory(code)
   })
-  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE, function () {
-    evalLogsBridge.send('run')
-  })
+  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE, () => elBridgeP.send('run'))
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow, function () {
     // 当光标位于第一行时触发
   })
@@ -324,6 +322,7 @@ export default function EditorZone() {
       })
     }
   }, [language, monaco])
+  const compileResultRef = useRef<monacoEditor.languages.typescript.EmitOutput>()
   useEffect(() => {
     const model = editorRef.current?.getModel()
     if (model) {
@@ -331,10 +330,16 @@ export default function EditorZone() {
         .then(worker => worker(model.uri))
         .then(client => client.getEmitOutput(model.uri.toString()))
         .then(result => {
-          evalLogsBridge.send('compile-completed', result.outputFiles)
+          compileResultRef.current = result
+          elBridgeP.send('compile-completed', result.outputFiles)
         })
     }
   }, [editorRef?.current, monaco, code])
+  useEffect(() => elBridgeP.on('compile', () => {
+    if (!compileResultRef.current) return
+
+    elBridgeP.send('compile-completed', compileResultRef.current.outputFiles)
+  }), [])
 
   const realVersion = isNeedCheckFetching
     ? distTagEnumMemo?.[typescriptVersion]
@@ -429,7 +434,7 @@ export default function EditorZone() {
     />
     <div className='menu'>
       <div className='btns'>
-        <button className='excute' onClick={() => evalLogsBridge.send('run')}>
+        <button className='excute' onClick={() => elBridgeP.send('run')}>
           Execute
         </button>
         <button className='history' onClick={() => historyDialogRef.current?.open()}>

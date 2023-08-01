@@ -2,7 +2,7 @@ import * as Awaitabler from 'awaitabler'
 import * as AwaitablerString from 'awaitabler/prototypes/string.reg'
 import * as AwaitablerNumber from 'awaitabler/prototypes/number.reg'
 
-import { evalLogsBridge } from './eval-logs-bridge.ts'
+import { elBridgeC } from './eval-logs-bridge.ts'
 import { FILES } from './eval-logs-FILES.ts'
 
 // @ts-ignore
@@ -33,7 +33,7 @@ function addDisposeFunc(func?: Function) {
   }
 }
 
-evalLogsBridge.on('run', () => {
+elBridgeC.on('run', () => {
   FILES.forEach(({ name, text: code }) => {
     // TODO support fileSystem
     try {
@@ -46,7 +46,7 @@ evalLogsBridge.on('run', () => {
     }
   })
 })
-evalLogsBridge.on('update:localStorage', ([key, value]) => {
+elBridgeC.on('update:localStorage', ([key, value]) => {
   let isReload = true
   if (key === 'uiTheme') {
     const currentTheme = JSON.parse(localStorage.getItem('uiTheme') ?? '""')
