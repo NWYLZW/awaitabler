@@ -47,13 +47,8 @@ elBridgeC.on('run', () => {
   })
 })
 elBridgeC.on('update:localStorage', ([key, value]) => {
-  let isReload = true
-  if (key === 'uiTheme') {
-    const currentTheme = JSON.parse(localStorage.getItem('uiTheme') ?? '""')
-    if (currentTheme === value) {
-      isReload = false
-    }
+  const currentTheme = JSON.parse(localStorage.getItem(key) ?? '""')
+  if (currentTheme !== value) {
+    localStorage.setItem(key, JSON.stringify(value))
   }
-  localStorage.setItem(key, JSON.stringify(value))
-  isReload && location.reload()
 })
