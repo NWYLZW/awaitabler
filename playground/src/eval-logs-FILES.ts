@@ -11,10 +11,6 @@ export let FILES: (
 type Listener = (files: typeof FILES) => void | Promise<void>
 const listeners: Listener[] = []
 export function getFiles() {
-  // 由于加载顺序的不可靠，可能出现 monaco 先被加载，而旁边的 devtools 随后加载
-  // 这种情况下，monaco editor 初始化的代码内容不会被 devtools 所感知
-  // 需要主动向父级申请下发最新数据
-  // 为了逻辑的简便性，强制所有的初始化都会尝试去获取一遍最新的数据
   return [FILES, (callback: Listener) => {
     listeners.push(callback)
     elBridgeC.send('compile')
