@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 import EditorZone from './components/EditorZone'
 import { ThemeSwitcher } from './components/ThemeSwitcher.tsx'
-import { elBridgeP } from './eval-logs-bridge.ts'
+import { elBridgeP } from './pages/eval-logs/bridge.ts'
 
 function App() {
   useEffect(() => onThemeChange(theme => elBridgeP.send('update:localStorage', ['uiTheme', {

@@ -17,7 +17,7 @@ import examples from '../examples.ts'
 import Switcher from './Switcher.tsx'
 import { CodeHistoryItem, useCodeHistory } from './EditorZone_CodeHistory.ts'
 import { typescriptVersionMeta, useDistTags } from './editor.typescript.versions.ts'
-import { elBridgeP } from '../eval-logs-bridge.ts'
+import { elBridgeP } from '../pages/eval-logs/bridge.ts'
 
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'

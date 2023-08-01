@@ -1,4 +1,4 @@
-import { IframeBridge } from './iframe-bridge.ts'
+import { IframeBridge } from '../../iframe-bridge.ts'
 
 export type EvalLogsIframeParentEvent =
 | {
@@ -21,12 +21,12 @@ export type EvalLogsIframeChildEvent =
   type: 'compile'
 }
 
-export const evalLogsBridge = new IframeBridge<EvalLogsIframeParentEvent | EvalLogsIframeChildEvent>(
+export const bridge = new IframeBridge<EvalLogsIframeParentEvent | EvalLogsIframeChildEvent>(
   () => document.querySelector<HTMLIFrameElement>('iframe.eval-logs')
     ?.contentWindow
     ?? window.parent,
   location.origin
 )
 
-export const elBridgeP = evalLogsBridge as IframeBridge<EvalLogsIframeParentEvent, EvalLogsIframeChildEvent>
-export const elBridgeC = evalLogsBridge as IframeBridge<EvalLogsIframeChildEvent, EvalLogsIframeParentEvent>
+export const elBridgeP = bridge as IframeBridge<EvalLogsIframeParentEvent, EvalLogsIframeChildEvent>
+export const elBridgeC = bridge as IframeBridge<EvalLogsIframeChildEvent, EvalLogsIframeParentEvent>

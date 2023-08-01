@@ -1,17 +1,17 @@
 import * as Babel from '@babel/standalone'
 import awaitAutoBox from 'awaitabler/await-auto-box.ts'
 
-import { elBridgeC, EvalLogsIframeParentEvent } from './eval-logs-bridge.ts'
+import { elBridgeC, EvalLogsIframeParentEvent } from './bridge.ts'
 
-export let FILES: (
+export let Files: (
   & Extract<EvalLogsIframeParentEvent, { type: 'compile-completed' }>['data'][number]
   & { originalText: string }
 )[] = []
 
-type Listener = (files: typeof FILES) => void | Promise<void>
+type Listener = (files: typeof Files) => void | Promise<void>
 const listeners: Listener[] = []
 export function getFiles() {
-  return [FILES, (callback: Listener) => {
+  return [Files, (callback: Listener) => {
     listeners.push(callback)
     elBridgeC.send('compile')
     return () => {
@@ -22,7 +22,7 @@ export function getFiles() {
 }
 
 elBridgeC.on('compile-completed', files => {
-  FILES = files.map(({ name, text }) => {
+  Files = files.map(({ name, text }) => {
     const filename = name.slice(7)
     const { code } = Babel.transform(text, {
       presets: ['es2015'],
@@ -31,5 +31,5 @@ elBridgeC.on('compile-completed', files => {
     }) ?? {}
     return { name: filename, originalText: text, text: code ?? '' }
   })
-  listeners.forEach(func => func(FILES))
+  listeners.forEach(func => func(Files))
 })

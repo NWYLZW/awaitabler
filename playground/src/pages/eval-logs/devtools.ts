@@ -1,6 +1,6 @@
 import * as UI from '//chii/ui/legacy/legacy.js'
 
-import { getFiles } from './eval-logs-FILES.ts'
+import { getFiles } from './files.ts'
 
 class JSOutput extends UI.Widget.Widget {
   constructor() {

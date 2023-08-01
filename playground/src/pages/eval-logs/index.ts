@@ -2,8 +2,8 @@ import * as Awaitabler from 'awaitabler'
 import * as AwaitablerString from 'awaitabler/prototypes/string.reg'
 import * as AwaitablerNumber from 'awaitabler/prototypes/number.reg'
 
-import { elBridgeC } from './eval-logs-bridge.ts'
-import { FILES } from './eval-logs-FILES.ts'
+import { elBridgeC } from './bridge.ts'
+import { Files } from './files.ts'
 
 // @ts-ignore
 window.require = function (name) {
@@ -34,7 +34,7 @@ function addDisposeFunc(func?: Function) {
 }
 
 elBridgeC.on('run', () => {
-  FILES.forEach(({ name, text: code }) => {
+  Files.forEach(({ name, text: code }) => {
     // TODO support fileSystem
     try {
       prevDisposeFunc?.()
