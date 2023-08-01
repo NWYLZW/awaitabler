@@ -1,5 +1,4 @@
 import type * as UI from '//chii/ui/legacy/legacy.js'
-import type * as ThemeSupport from '//chii/ui/legacy/theme_support/theme_support.js'
 
 import { getFiles } from './files.ts'
 
@@ -13,19 +12,26 @@ localStorage.setItem("consoleShowSettingsToolbar", JSON.stringify(false))
 localStorage.setItem('textEditorIndent', JSON.stringify('  '))
 
 const devtools = document.querySelector('iframe')!
+type importMap = {
+  'ui/legacy/legacy.js': typeof import('//chii/ui/legacy/legacy.js')
+  'ui/legacy/theme_support/theme_support.js': typeof import('//chii/ui/legacy/theme_support/theme_support.js')
+}
 const devtoolsWindow = devtools.contentWindow! as Window & {
-  importUI: () => Promise<typeof UI>
-  importThemeSupport: () => Promise<typeof ThemeSupport>
+  simport: <const T>(path: T) => Promise<
+    T extends keyof importMap
+      ? importMap[T]
+      : T
+  >
 }
 const devtoolsDocument = devtools.contentDocument!
 
 let inited = false
 async function checkInspectorViewIsLoaded() {
-  const realThemeSupport = await devtoolsWindow.importThemeSupport()
+  const realThemeSupport = await devtoolsWindow.simport('ui/legacy/theme_support/theme_support.js')
   if (!realThemeSupport.ThemeSupport.hasInstance())
     return
 
-  const realUI = await devtoolsWindow.importUI()
+  const realUI = await devtoolsWindow.simport('ui/legacy/legacy.js')
   const inspectorView = realUI.InspectorView.InspectorView.instance()
   if (inspectorView && !inited) {
     inited = true
