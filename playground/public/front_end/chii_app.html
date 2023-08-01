@@ -19,7 +19,10 @@
       display: none !important;
     }`
     el.shadowRoot.prepend(style)
-  });
+  })
 </script>
 <script type="module" src="//cdn.jsdelivr.net/npm/chii/public/front_end/entrypoints/chii_app/chii_app.js"></script>
+<script type="module">
+  console.log(await import('//cdn.jsdelivr.net/npm/chii/public/front_end/ui/legacy/legacy.js'))
+</script>
 <body class="undocked" id="-blink-dev-tools">
