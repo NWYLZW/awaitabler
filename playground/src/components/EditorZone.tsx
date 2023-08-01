@@ -571,7 +571,6 @@ export default function EditorZone() {
           // @ts-ignore
           editorRef.current = editor
           editor.onDidChangeModelContent(function compile() {
-            console.log('onMount compile')
             const model = editor.getModel()
             if (model) {
               monaco?.languages.typescript.getTypeScriptWorker()
