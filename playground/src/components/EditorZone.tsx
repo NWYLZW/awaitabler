@@ -323,18 +323,6 @@ export default function EditorZone() {
     }
   }, [language, monaco])
   const compileResultRef = useRef<monacoEditor.languages.typescript.EmitOutput>()
-  useEffect(() => {
-    const model = editorRef.current?.getModel()
-    if (model) {
-      monaco?.languages.typescript.getTypeScriptWorker()
-        .then(worker => worker(model.uri))
-        .then(client => client.getEmitOutput(model.uri.toString()))
-        .then(result => {
-          compileResultRef.current = result
-          elBridgeP.send('compile-completed', result.outputFiles)
-        })
-    }
-  }, [editorRef?.current, monaco, code])
   useEffect(() => elBridgeP.on('compile', () => {
     if (!compileResultRef.current) return
 
@@ -582,6 +570,20 @@ export default function EditorZone() {
         onMount={(editor, monaco) => {
           // @ts-ignore
           editorRef.current = editor
+          editor.onDidChangeModelContent(function compile() {
+            console.log('onMount compile')
+            const model = editor.getModel()
+            if (model) {
+              monaco?.languages.typescript.getTypeScriptWorker()
+                .then(worker => worker(model.uri))
+                .then(client => client.getEmitOutput(model.uri.toString()))
+                .then(result => {
+                  compileResultRef.current = result
+                  elBridgeP.send('compile-completed', result.outputFiles)
+                })
+            }
+            return compile
+          }())
           addCommands(editor, monaco, code => codeHistoryDispatch({ type: 'add', code }))
         }}
       />}
