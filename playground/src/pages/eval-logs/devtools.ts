@@ -1,6 +1,5 @@
 import type * as UI from '//chii/ui/legacy/legacy.js'
 
-import { getFiles } from './files.ts'
 import { elBridgeC } from './bridge.ts'
 
 const storageInited = localStorage.getItem('storageInited')
@@ -16,20 +15,22 @@ localStorage.setItem(
 )
 localStorage.setItem('panel-selectedTab', JSON.stringify('console'))
 
-type importMap = {
+type ImportMap = {
   'ui/legacy/legacy.js': typeof import('//chii/ui/legacy/legacy.js')
   'core/common/common.js': typeof import('//chii/core/common/common.js')
   'ui/legacy/theme_support/theme_support.js': typeof import('//chii/ui/legacy/theme_support/theme_support.js')
 }
 
-const devtools = document.querySelector('iframe')!
-const devtoolsWindow = devtools.contentWindow! as Window & {
-  simport: <R = never, const T extends keyof importMap | (string & {}) = string>(path: T) => Promise<
+export type DevtoolsWindow = Window & {
+  simport: <R = never, const T extends keyof ImportMap | (string & {}) = string>(path: T) => Promise<
     [R] extends [never]
-      ? T extends keyof importMap ? importMap[T] : unknown
+      ? T extends keyof ImportMap ? ImportMap[T] : unknown
       : R
   >
 }
+
+const devtools = document.querySelector('iframe')!
+const devtoolsWindow = devtools.contentWindow as DevtoolsWindow
 const devtoolsDocument = devtools.contentDocument!
 
 let inited = false
@@ -55,42 +56,12 @@ async function checkInspectorViewIsLoaded() {
 
 async function init(realUI: typeof UI, inspectorView: UI.InspectorView.InspectorView) {
   const tabbedPane = inspectorView?.tabbedPane
-  tabbedPane.appendTab('.js', '.JS', new class JSOutput extends realUI.Widget.Widget {
-    constructor() {
-      super()
-      const text = document.createElement('pre')
-      text.style.cursor = 'text'
-      text.style.userSelect = 'text'
-      text.style.whiteSpace = 'pre-wrap'
-      text.style.margin = '0'
-      text.style.padding = '0 4px'
-      text.textContent = ''
-      text.removeChildren = () => {
-        text.textContent = ''
-      }
-      text.traverseNextNode = () => {
-        return null
-      }
-      let highlightNodeRef: CodeHighlighter['highlightNode'] | undefined = undefined
-      const [FILES, onFiles] = getFiles()
-      function update(files = FILES) {
-        text.textContent = files.map(({ name, originalText }) => `// @filename:${name}\n${originalText}`).join('\n\n')
-        if (highlightNodeRef) {
-          highlightNodeRef(text, 'text/javascript')
-        }
-      }
-      update()
-      onFiles(update)
-      this.contentElement.appendChild(text)
 
-      type CodeHighlighter = typeof import('//chii/ui/components/code_highlighter/CodeHighlighter.ts')
-      devtoolsWindow.simport<CodeHighlighter>('ui/components/code_highlighter/CodeHighlighter.js')
-        .then(({ highlightNode }) => {
-          highlightNodeRef = highlightNode
-          highlightNode(text, 'text/javascript')
-        })
-    }
-  }())
+  const { default: OutputsPlugin } = await import('../../plugins/outputs.ts')
+  OutputsPlugin.devtools?.panels?.forEach(panel => {
+    const Widget = panel(devtoolsWindow, realUI)
+    tabbedPane?.appendTab(panel.id, panel.title, new Widget())
+  })
 
   const Utils = await devtoolsWindow.simport<
     typeof import('//chii/ui/legacy/components/utils/utils')
