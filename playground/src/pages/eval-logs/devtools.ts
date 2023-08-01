@@ -63,14 +63,32 @@ async function init(realUI: typeof UI, inspectorView: UI.InspectorView.Inspector
       text.style.userSelect = 'text'
       text.style.whiteSpace = 'pre-wrap'
       text.style.margin = '0'
-      text.innerText = ''
+      text.style.padding = '0 4px'
+      text.textContent = ''
+      text.removeChildren = () => {
+        text.textContent = ''
+      }
+      text.traverseNextNode = () => {
+        return null
+      }
+      let highlightNodeRef: CodeHighlighter['highlightNode'] | undefined = undefined
       const [FILES, onFiles] = getFiles()
       function update(files = FILES) {
-        text.innerText = files.map(({ name, originalText }) => `// @filename:${name}\n${originalText}`).join('\n\n')
+        text.textContent = files.map(({ name, originalText }) => `// @filename:${name}\n${originalText}`).join('\n\n')
+        if (highlightNodeRef) {
+          highlightNodeRef(text, 'text/javascript')
+        }
       }
       update()
       onFiles(update)
       this.contentElement.appendChild(text)
+
+      type CodeHighlighter = typeof import('//chii/ui/components/code_highlighter/CodeHighlighter.ts')
+      devtoolsWindow.simport<CodeHighlighter>('ui/components/code_highlighter/CodeHighlighter.js')
+        .then(({ highlightNode }) => {
+          highlightNodeRef = highlightNode
+          highlightNode(text, 'text/javascript')
+        })
     }
   }())
 
