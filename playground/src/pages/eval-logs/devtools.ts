@@ -1,4 +1,5 @@
 import type * as UI from '//chii/ui/legacy/legacy.js'
+import type * as ThemeSupport from '//chii/ui/legacy/theme_support/theme_support.js'
 
 import { getFiles } from './files.ts'
 
@@ -13,16 +14,19 @@ initChii: (async () => {
   localStorage.setItem('textEditorIndent', JSON.stringify('  '))
 
   const devtools = document.querySelector('iframe')!
-  const devtoolsWindow = devtools.contentWindow!
+  const devtoolsWindow = devtools.contentWindow! as Window & {
+    importUI: () => Promise<typeof UI>
+    importThemeSupport: () => Promise<typeof ThemeSupport>
+  }
   const devtoolsDocument = devtools.contentDocument!
 
   let inited = false
-  function init() {
-    const importUI = devtoolsWindow
-      // @ts-ignore
-      .importUI as () => typeof UI
-    const realUI = importUI()
+  async function init() {
+    const realThemeSupport = await devtoolsWindow.importThemeSupport()
+    if (!realThemeSupport.ThemeSupport.hasInstance())
+      return
 
+    const realUI = await devtoolsWindow.importUI()
     const chiiSidebar = realUI.InspectorView.InspectorView.instance()
     if (chiiSidebar && !inited) {
       inited = true

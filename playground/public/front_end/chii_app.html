@@ -22,9 +22,8 @@
   })
 </script>
 <script type="module">
-  import * as UI from 'https://cdn.jsdelivr.net/npm/chii/public/front_end/ui/legacy/legacy.js'
-  window.importUI = () => UI
-  // console.log('mounted', UI)
+  window.importUI = () => import('https://cdn.jsdelivr.net/npm/chii/public/front_end/ui/legacy/legacy.js')
+  window.importThemeSupport = () => import('https://cdn.jsdelivr.net/npm/chii/public/front_end/ui/legacy/theme_support/theme_support.js')
 </script>
 <script type="module" src="//cdn.jsdelivr.net/npm/chii/public/front_end/entrypoints/chii_app/chii_app.js"></script>
 <body class="undocked" id="-blink-dev-tools">
