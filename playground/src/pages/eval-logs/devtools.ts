@@ -20,39 +20,42 @@ const devtoolsWindow = devtools.contentWindow! as Window & {
 const devtoolsDocument = devtools.contentDocument!
 
 let inited = false
-async function init() {
+async function checkInspectorViewIsLoaded() {
   const realThemeSupport = await devtoolsWindow.importThemeSupport()
   if (!realThemeSupport.ThemeSupport.hasInstance())
     return
 
   const realUI = await devtoolsWindow.importUI()
-  const chiiSidebar = realUI.InspectorView.InspectorView.instance()
-  if (chiiSidebar && !inited) {
+  const inspectorView = realUI.InspectorView.InspectorView.instance()
+  if (inspectorView && !inited) {
     inited = true
-
-    const tabbedPane = chiiSidebar?.tabbedPane
-    tabbedPane.appendTab('.js', '.JS', new class JSOutput extends realUI.Widget.Widget {
-      constructor() {
-        super()
-        const text = document.createElement('pre')
-        text.style.cursor = 'text'
-        text.style.userSelect = 'text'
-        text.style.whiteSpace = 'pre-wrap'
-        text.style.margin = '0'
-        text.innerText = ''
-        const [FILES, onFiles] = getFiles()
-        function update(files = FILES) {
-          text.innerText = files.map(({ name, originalText }) => `// @filename:${name}\n${originalText}`).join('\n\n')
-        }
-        update()
-        onFiles(update)
-        this.contentElement.appendChild(text)
-      }
-    }())
+    init(realUI, inspectorView)
   }
 }
 if (devtoolsDocument.readyState === 'complete') {
-  await init()
+  await checkInspectorViewIsLoaded()
 } else {
-  devtoolsDocument.addEventListener('load', init, true)
+  devtoolsDocument.addEventListener('load', checkInspectorViewIsLoaded, true)
+}
+
+function init(realUI: typeof UI, inspectorView: UI.InspectorView.InspectorView) {
+  const tabbedPane = inspectorView?.tabbedPane
+  tabbedPane.appendTab('.js', '.JS', new class JSOutput extends realUI.Widget.Widget {
+    constructor() {
+      super()
+      const text = document.createElement('pre')
+      text.style.cursor = 'text'
+      text.style.userSelect = 'text'
+      text.style.whiteSpace = 'pre-wrap'
+      text.style.margin = '0'
+      text.innerText = ''
+      const [FILES, onFiles] = getFiles()
+      function update(files = FILES) {
+        text.innerText = files.map(({ name, originalText }) => `// @filename:${name}\n${originalText}`).join('\n\n')
+      }
+      update()
+      onFiles(update)
+      this.contentElement.appendChild(text)
+    }
+  }())
 }
