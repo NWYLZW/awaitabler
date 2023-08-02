@@ -16,7 +16,14 @@ export default (function ({ UI, devtoolsWindow: { simport } }) {
 
   const files = useFiles()
   const textContent = useMemo(
-    () => files.map(({ name, originalText }) => `// @filename:${name}\n${originalText}`).join('\n\n'),
+    () => files
+      .filter(({ name }) => name.endsWith('.js'))
+      .map(({ name, text, originalText }) => `// @filename:${name}\n${
+        originalText.startsWith('// @devtools.output.compiled\r\n')
+          ? text
+          : originalText
+      }`)
+      .join('\n\n'),
     [files]
   )
   useEffect(() => {

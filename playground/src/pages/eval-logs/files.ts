@@ -11,17 +11,6 @@ export let Files: (
 
 type Listener = (files: typeof Files) => void | Promise<void>
 const listeners: Listener[] = []
-export function getFiles() {
-  return [Files, (callback: Listener) => {
-    listeners.push(callback)
-    elBridgeC.send('compile')
-    return () => {
-      const index = listeners.indexOf(callback)
-      listeners.splice(index, 1)
-    }
-  }] as const
-}
-
 const getFilesSubscribe = (callback: Listener) => {
   listeners.push(callback)
   elBridgeC.send('compile')
@@ -30,19 +19,21 @@ const getFilesSubscribe = (callback: Listener) => {
     listeners.splice(index, 1)
   }
 }
-
 export function useFiles() {
   return useSyncExternalStore<typeof Files>(getFilesSubscribe, () => Files)
 }
 
 elBridgeC.on('compile-completed', files => {
   Files = files.map(({ name, text }) => {
+    let code = text
     const filename = name.slice(7)
-    const { code } = Babel.transform(text, {
-      presets: ['es2015'],
-      plugins: [awaitAutoBox],
-      filename
-    }) ?? {}
+    if (filename.endsWith('.js')) {
+      code = Babel.transform(text, {
+        presets: ['es2015'],
+        plugins: [awaitAutoBox],
+        filename
+      })?.code ?? ''
+    }
     return { name: filename, originalText: text, text: code ?? '' }
   })
   listeners.forEach(func => func(Files))
