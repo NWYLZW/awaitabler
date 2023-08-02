@@ -1,10 +1,40 @@
-import { defineDevtoolsPanel, definePlugins } from '../index.tsx'
-import JsPanel from './js-panel.tsx'
+import { useMemo } from 'react'
 
-const JSPanel = defineDevtoolsPanel('outputs.js', '.JS', 'react', JsPanel)
-// DTS
-const DTSPanel = defineDevtoolsPanel('outputs.d.ts', '.DTS', 'react', ({ devtoolsWindow, UI }) => {
-  return <>This is .DTS panel</>
+import { defineDevtoolsPanel, definePlugins } from '../index.tsx'
+import { useFiles } from '../../pages/eval-logs/files.ts'
+import CodeHighlighter from './code-highlighter.tsx'
+
+const JSPanel = defineDevtoolsPanel('outputs.js', '.JS', 'react', ({ UI, devtoolsWindow: { simport } }) => {
+  const files = useFiles()
+  return <CodeHighlighter
+    code={useMemo(
+      () => files
+        .filter(({ name }) => name.endsWith('.js'))
+        .map(({ name, text, originalText }) => `// @filename:${name}\n${
+          originalText.startsWith('// @devtools.output.compiled\r\n')
+            ? text
+            : originalText
+        }`)
+        .join('\n\n'),
+      [files]
+    )}
+    lang='javascript'
+    devtoolsWindow={{ simport }}
+  />
+})
+const DTSPanel = defineDevtoolsPanel('outputs.d.ts', '.D.TS', 'react', ({ UI, devtoolsWindow: { simport } }) => {
+  const files = useFiles()
+  return <CodeHighlighter
+    code={useMemo(
+      () => files
+        .filter(({ name }) => name.endsWith('.d.ts'))
+        .map(({ name, text }) => `// @filename:${name}\n${text}`)
+        .join('\n\n'),
+      [files]
+    )}
+    lang='typescript'
+    devtoolsWindow={{ simport }}
+  />
 })
 // Errors
 // AST
