@@ -7,9 +7,9 @@ import { DevtoolsWindow } from '../pages/eval-logs/devtools.ts'
 
 type TraverseNextNode = (stayWithin?: Node) => Node | null
 
-type Render = (devtoolsWindow: DevtoolsWindow, UI: typeof UITypes) => typeof UITypes.Widget.Widget
-type ReactRender = (props: {
-  devtoolsWindow: Window,
+export type Render = (devtoolsWindow: DevtoolsWindow, UI: typeof UITypes) => typeof UITypes.Widget.Widget
+export type ReactRender = (props: {
+  devtoolsWindow: DevtoolsWindow,
   UI: typeof UITypes,
   onTraverseNextNode: (lis: TraverseNextNode) => () => void
 }) => ReactElement
