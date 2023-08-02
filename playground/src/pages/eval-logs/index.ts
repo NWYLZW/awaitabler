@@ -35,6 +35,8 @@ function addDisposeFunc(func?: Function) {
 
 elBridgeC.on('run', () => {
   Files.forEach(({ name, text: code }) => {
+    if (name !== '/index.js') return
+
     // TODO support fileSystem
     try {
       prevDisposeFunc?.()
