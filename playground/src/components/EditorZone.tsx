@@ -44,6 +44,7 @@ const extraModules = Object
   }), [] as { content: string, filePath: string }[])
 const compilerOptions: monacoEditor.languages.typescript.CompilerOptions = {
   moduleResolution: 2,
+  declaration: true,
 }
 
 function copyToClipboard(text: string) {
