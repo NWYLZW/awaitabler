@@ -1,10 +1,18 @@
 import type * as UITypes from '//chii/ui/legacy/legacy.js'
 import type { ReactElement } from 'react'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 
 import { DevtoolsWindow } from '../pages/eval-logs/devtools.ts'
 
+type TraverseNextNode = (stayWithin?: Node) => Node | null
+
 type Render = (devtoolsWindow: DevtoolsWindow, UI: typeof UITypes) => typeof UITypes.Widget.Widget
-type ReactRender = (props: { devtoolsWindow: Window, UI: typeof UITypes }) => ReactElement
+type ReactRender = (props: {
+  devtoolsWindow: Window,
+  UI: typeof UITypes,
+  onTraverseNextNode: (lis: TraverseNextNode) => () => void
+}) => ReactElement
 
 type PanelMeta = {
   id: string
@@ -39,6 +47,24 @@ export function defineDevtoolsPanel(
       const [type, Render] = tuple
       const newRender: Render = (devtoolsWindow, UI) => {
         return class extends UI.Widget.Widget {
+          constructor() {
+            super()
+            const root = document.createElement('div') as HTMLDivElement & {
+              traverseNextNode(stayWithin?: Node): Node | null
+            }
+            root.traverseNextNode = () => null
+
+            this.element.appendChild(root)
+            ReactDOM.createRoot(root)
+              .render(<Render {...{
+                UI,
+                devtoolsWindow,
+                onTraverseNextNode: lis => {
+                  root.traverseNextNode = lis
+                  return () => root.traverseNextNode = () => null
+                }
+              }} />)
+          }
         }
       }
       return Object.assign(newRender, { id, type, title })

@@ -57,7 +57,7 @@ async function checkInspectorViewIsLoaded() {
 async function init(realUI: typeof UI, inspectorView: UI.InspectorView.InspectorView) {
   const tabbedPane = inspectorView?.tabbedPane
 
-  const { default: OutputsPlugin } = await import('../../plugins/outputs.ts')
+  const { default: OutputsPlugin } = await import('../../plugins/outputs')
   OutputsPlugin.devtools?.panels?.forEach(panel => {
     const Widget = panel(devtoolsWindow, realUI)
     tabbedPane?.appendTab(panel.id, panel.title, new Widget())
