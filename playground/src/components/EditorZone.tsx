@@ -24,7 +24,7 @@ const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
 
 // TODO support filter plugins
-const plugins = import.meta.glob('../plugins/**/index.ts', {
+const plugins = import.meta.glob('../plugins/*/index.ts*', {
   eager: true, import: 'default'
 }) as Record<string, ReturnType<typeof definePlugins>>
 

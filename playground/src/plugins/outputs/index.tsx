@@ -57,6 +57,31 @@ const DTSPanel = defineDevtoolsPanel('outputs.d.ts', '.D.TS', 'react', ({ UI, de
 // AST
 
 export default definePlugins({
+  editor(monaco) {
+    const disposables = [
+      monaco.languages.registerCompletionItemProvider('typescript', {
+        triggerCharacters: ['@'],
+        async provideCompletionItems(model, position) {
+          if (position.lineNumber !== 1) return
+
+          const line = model.getLineContent(position.lineNumber)
+          if (line.startsWith('// @')) {
+            return {
+              suggestions: [
+                {
+                  label: 'devtools.output.compiled',
+                  kind: monaco.languages.CompletionItemKind.Text,
+                  insertText: 'devtools.output.compiled',
+                  range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+                }
+              ]
+            }
+          }
+        }
+      })
+    ]
+    return () => disposables.forEach(d => d.dispose())
+  },
   devtools: {
     panels: [JSPanel, DTSPanel]
   }
