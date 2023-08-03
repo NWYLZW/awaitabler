@@ -23,6 +23,11 @@ import { definePlugins } from '../plugins'
 const BORDER_SIZE = 5
 const DOUBLE_CLICK_WIDTH = '500px'
 
+// TODO support filter plugins
+const plugins = import.meta.glob('../plugins/**/index.ts', {
+  eager: true, import: 'default'
+}) as Record<string, ReturnType<typeof definePlugins>>
+
 const awaitablerCodes = import.meta.glob([
   '../../../src/**',
   '!../../../src/configure.ts',
@@ -318,10 +323,6 @@ export default function EditorZone() {
     console.log('typescript.version', monaco.languages.typescript.typescriptVersion)
     console.log('typescript.CompilerOptions', monaco.languages.typescript.typescriptDefaults.getCompilerOptions())
     console.groupEnd()
-    // TODO support filter plugins
-    const plugins = import.meta.glob('../plugins/**/index.ts', {
-      eager: true, import: 'default'
-    }) as Record<string, ReturnType<typeof definePlugins>>
     const dispose = Object.values(plugins)
       .reduce(
         (acc, plugin) => plugin.editor
