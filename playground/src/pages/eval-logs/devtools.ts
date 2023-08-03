@@ -56,12 +56,12 @@ async function checkInspectorViewIsLoaded() {
 })()
 
 const plugins = import.meta.glob('../../plugins/*/index.ts*', {
-  eager: true, import: 'default'
-}) as Record<string, ReturnType<typeof definePlugins>>
+  import: 'default'
+}) as Record<string, () => Promise<ReturnType<typeof definePlugins>>>
 function registerPlugins(realUI: typeof UI, tabbedPane: UI.TabbedPane.TabbedPane) {
   Object.entries(plugins)
-    .forEach(([path, plugin]) => {
-      const { devtools } = plugin
+    .forEach(async ([path, plugin]) => {
+      const { devtools } = await plugin()
       devtools?.panels?.forEach(panel => {
         const Widget = panel(devtoolsWindow, realUI)
         if (tabbedPane.hasTab(panel.id)) {
