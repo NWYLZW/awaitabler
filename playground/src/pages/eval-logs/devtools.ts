@@ -31,7 +31,7 @@ export type DevtoolsWindow = Window & {
 }
 
 const devtools = document.querySelector('iframe')!
-let devtoolsWindow = devtools.contentWindow as DevtoolsWindow
+let devtoolsWindow: DevtoolsWindow = devtools.contentWindow! as DevtoolsWindow
 let devtoolsDocument = devtools.contentDocument!
 
 let inited = false
@@ -76,10 +76,18 @@ async function init() {
   let isReload = false
 
   async function loadPlugins() {
-    const realUI = await devtoolsWindow.simport('ui/legacy/legacy.js')
-    const inspectorView = realUI.InspectorView.InspectorView.instance()
-    const tabbedPane = inspectorView?.tabbedPane
-    registerPlugins(realUI, tabbedPane)
+    while (true) {
+      try {
+        const realUI = await devtoolsWindow.simport('ui/legacy/legacy.js')
+        const inspectorView = realUI.InspectorView.InspectorView.instance()
+        const tabbedPane = inspectorView?.tabbedPane
+        registerPlugins(realUI, tabbedPane)
+        break
+      } catch (e) {
+        console.error(e)
+      }
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
   }
   await loadPlugins()
   async function reload() {
