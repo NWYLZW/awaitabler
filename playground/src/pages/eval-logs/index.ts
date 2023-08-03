@@ -49,8 +49,8 @@ elBridgeC.on('run', () => {
   })
 })
 elBridgeC.on('update:localStorage', ([key, value]) => {
-  const currentTheme = JSON.parse(localStorage.getItem(key) ?? '""')
-  if (currentTheme !== value) {
+  const current = JSON.parse(localStorage.getItem(key) ?? '""')
+  if (current !== value) {
     localStorage.setItem(key, JSON.stringify(value))
   }
 })
