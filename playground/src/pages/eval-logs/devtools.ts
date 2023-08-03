@@ -1,6 +1,7 @@
 import type * as UI from '//chii/ui/legacy/legacy.js'
 
 import { elBridgeC } from './bridge.ts'
+import { definePlugins } from '../../plugins'
 
 const storageInited = localStorage.getItem('storageInited')
 if (!storageInited) {
@@ -16,9 +17,9 @@ localStorage.setItem(
 localStorage.setItem('panel-selectedTab', JSON.stringify('console'))
 
 type ImportMap = {
-  'ui/legacy/legacy.js': typeof import('//chii/ui/legacy/legacy.js')
-  'core/common/common.js': typeof import('//chii/core/common/common.js')
-  'ui/legacy/theme_support/theme_support.js': typeof import('//chii/ui/legacy/theme_support/theme_support.js')
+  'ui/legacy/legacy.js': typeof import('//chii/ui/legacy/legacy')
+  'core/common/common.js': typeof import('//chii/core/common/common')
+  'ui/legacy/theme_support/theme_support.js': typeof import('//chii/ui/legacy/theme_support/theme_support')
 }
 
 export type DevtoolsWindow = Window & {
@@ -30,8 +31,8 @@ export type DevtoolsWindow = Window & {
 }
 
 const devtools = document.querySelector('iframe')!
-const devtoolsWindow = devtools.contentWindow as DevtoolsWindow
-const devtoolsDocument = devtools.contentDocument!
+let devtoolsWindow = devtools.contentWindow as DevtoolsWindow
+let devtoolsDocument = devtools.contentDocument!
 
 let inited = false
 async function checkInspectorViewIsLoaded() {
@@ -43,7 +44,7 @@ async function checkInspectorViewIsLoaded() {
   const inspectorView = realUI.InspectorView.InspectorView.instance()
   if (inspectorView && !inited) {
     inited = true
-    await init(realUI, inspectorView)
+    await init()
   }
 }
 ;(async () => {
@@ -54,14 +55,48 @@ async function checkInspectorViewIsLoaded() {
   }
 })()
 
-async function init(realUI: typeof UI, inspectorView: UI.InspectorView.InspectorView) {
-  const tabbedPane = inspectorView?.tabbedPane
+const plugins = import.meta.glob('../../plugins/*/index.ts*', {
+  eager: true, import: 'default'
+}) as Record<string, ReturnType<typeof definePlugins>>
+function registerPlugins(realUI: typeof UI, tabbedPane: UI.TabbedPane.TabbedPane) {
+  Object.entries(plugins)
+    .forEach(([path, plugin]) => {
+      const { devtools } = plugin
+      devtools?.panels?.forEach(panel => {
+        const Widget = panel(devtoolsWindow, realUI)
+        if (tabbedPane.hasTab(panel.id)) {
+          return
+        }
+        tabbedPane?.appendTab(panel.id, panel.title, new Widget())
+      })
+    })
+}
 
-  const { default: OutputsPlugin } = await import('../../plugins/outputs')
-  OutputsPlugin.devtools?.panels?.forEach(panel => {
-    const Widget = panel(devtoolsWindow, realUI)
-    tabbedPane?.appendTab(panel.id, panel.title, new Widget())
-  })
+async function init() {
+  let isReload = false
+
+  async function loadPlugins() {
+    const realUI = await devtoolsWindow.simport('ui/legacy/legacy.js')
+    const inspectorView = realUI.InspectorView.InspectorView.instance()
+    const tabbedPane = inspectorView?.tabbedPane
+    registerPlugins(realUI, tabbedPane)
+  }
+  await loadPlugins()
+  async function reload() {
+    devtoolsWindow.location.reload()
+
+    devtools.addEventListener('load', async () => {
+      if (
+        !devtools.contentDocument
+        || devtools.contentDocument.readyState !== 'complete'
+      ) return
+      devtoolsWindow = devtools.contentWindow as DevtoolsWindow
+      devtoolsDocument = devtools.contentDocument!
+
+      await loadPlugins()
+      isReload = false
+    }, true)
+  }
 
   const Utils = await devtoolsWindow.simport<
     typeof import('//chii/ui/legacy/components/utils/utils')
@@ -71,8 +106,9 @@ async function init(realUI: typeof UI, inspectorView: UI.InspectorView.Inspector
   const ThemeSupport = await devtoolsWindow.simport('ui/legacy/theme_support/theme_support.js')
   const Settings = Common.Settings.Settings.instance()
 
+  let uiTheme = ''
   elBridgeC.on('update:localStorage', ([key, value]) => {
-    if (key === 'uiTheme') {
+    if (key === 'uiTheme' && !isReload && uiTheme !== value) {
       // TODO make it reactive not reload devtools
       // const uiTheme = Settings.moduleSetting('uiTheme')
       // if (uiTheme.get() === value) return
@@ -81,7 +117,9 @@ async function init(realUI: typeof UI, inspectorView: UI.InspectorView.Inspector
       // Settings.moduleSetting('uiTheme').set(value)
       // ThemeSupport.ThemeSupport.instance().applyTheme(devtoolsDocument)
       // reload devtools
-      devtoolsWindow.location.reload()
+      uiTheme = value
+      isReload = true
+      reload()
     }
   })
 }
