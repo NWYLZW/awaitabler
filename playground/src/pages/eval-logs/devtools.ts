@@ -73,61 +73,30 @@ function registerPlugins(realUI: typeof UI, tabbedPane: UI.TabbedPane.TabbedPane
 }
 
 async function init() {
-  let isReload = false
-
-  async function loadPlugins() {
-    while (true) {
-      try {
-        const realUI = await devtoolsWindow.simport('ui/legacy/legacy.js')
-        const inspectorView = realUI.InspectorView.InspectorView.instance()
-        const tabbedPane = inspectorView?.tabbedPane
-        registerPlugins(realUI, tabbedPane)
-        break
-      } catch (e) {
-        console.error(e)
-      }
-      await new Promise(resolve => setTimeout(resolve, 100))
+  while (true) {
+    try {
+      const realUI = await devtoolsWindow.simport('ui/legacy/legacy.js')
+      const inspectorView = realUI.InspectorView.InspectorView.instance()
+      const tabbedPane = inspectorView?.tabbedPane
+      registerPlugins(realUI, tabbedPane)
+      break
+    } catch (e) {
+      console.error(e)
     }
-  }
-  await loadPlugins()
-  async function reload() {
-    devtoolsWindow.location.reload()
-
-    devtools.addEventListener('load', async () => {
-      if (
-        !devtools.contentDocument
-        || devtools.contentDocument.readyState !== 'complete'
-      ) return
-      devtoolsWindow = devtools.contentWindow as DevtoolsWindow
-      devtoolsDocument = devtools.contentDocument!
-
-      await loadPlugins()
-      isReload = false
-    }, true)
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
 
-  const Utils = await devtoolsWindow.simport<
-    typeof import('//chii/ui/legacy/components/utils/utils')
-  >('ui/legacy/components/utils/utils.js')
-
-  const Common = await devtoolsWindow.simport('core/common/common.js')
-  const ThemeSupport = await devtoolsWindow.simport('ui/legacy/theme_support/theme_support.js')
-  const Settings = Common.Settings.Settings.instance()
-
-  let uiTheme = ''
+  let uiTheme = JSON.parse(localStorage.getItem('uiTheme') ?? '""')
   elBridgeC.on('update:localStorage', ([key, value]) => {
-    if (key === 'uiTheme' && !isReload && uiTheme !== value) {
-      // TODO make it reactive not reload devtools
-      // const uiTheme = Settings.moduleSetting('uiTheme')
-      // if (uiTheme.get() === value) return
-      //
-      // console.log('set uiTheme', value)
-      // Settings.moduleSetting('uiTheme').set(value)
-      // ThemeSupport.ThemeSupport.instance().applyTheme(devtoolsDocument)
-      // reload devtools
+    if (key === 'uiTheme' && uiTheme !== value) {
+      const html = devtoolsDocument.querySelector('html')!
+      if (value === 'dark') {
+        html.classList.add('-theme-with-dark-background')
+      }
+      if (value === 'default') {
+        html.classList.remove('-theme-with-dark-background')
+      }
       uiTheme = value
-      isReload = true
-      reload()
     }
   })
 }
