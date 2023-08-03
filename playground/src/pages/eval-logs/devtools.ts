@@ -89,6 +89,7 @@ async function init() {
   let uiTheme = JSON.parse(localStorage.getItem('uiTheme') ?? '""')
   elBridgeC.on('update:localStorage', ([key, value]) => {
     if (key === 'uiTheme' && uiTheme !== value) {
+      // TODO Setting page select value is wrong
       const html = devtoolsDocument.querySelector('html')!
       if (value === 'dark') {
         html.classList.add('-theme-with-dark-background')
