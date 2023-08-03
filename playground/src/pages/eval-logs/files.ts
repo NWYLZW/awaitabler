@@ -28,11 +28,20 @@ elBridgeC.on('compile-completed', files => {
     let code = text
     const filename = name.slice(7)
     if (filename.endsWith('.js')) {
-      code = Babel.transform(text, {
-        presets: ['es2015'],
-        plugins: [awaitAutoBox],
-        filename
-      })?.code ?? ''
+      try {
+        code = Babel.transform(text, {
+          presets: ['es2015'],
+          plugins: [awaitAutoBox],
+          filename
+        })?.code ?? ''
+      } catch (e) {
+        return {
+          name: `${filename} (compile error)`,
+          originalText: text,
+          // @ts-ignore
+          text: e!.message!
+        }
+      }
     }
     return { name: filename, originalText: text, text: code ?? '' }
   })

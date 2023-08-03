@@ -6,6 +6,23 @@ import CodeHighlighter from './code-highlighter.tsx'
 
 const JSPanel = defineDevtoolsPanel('outputs.js', '.JS', 'react', ({ UI, devtoolsWindow: { simport } }) => {
   const files = useFiles()
+  const containerError = useMemo(
+    () => files.find(({ name }) => name.endsWith('(compile error)')),
+    [files]
+  )
+  if (containerError) {
+    return <CodeHighlighter
+      code={useMemo(
+        () => files
+          .filter(({ name }) => name.endsWith('(compile error)'))
+          .map(({ text }) => text)
+          .join('\n\n'),
+        [files]
+      )}
+      lang='text'
+      devtoolsWindow={{ simport }}
+    />
+  }
   return <CodeHighlighter
     code={useMemo(
       () => files
