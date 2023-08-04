@@ -28,7 +28,7 @@ const JSPanel = defineDevtoolsPanel('outputs.js', '.JS', 'react', ({ UI, devtool
       () => files
         .filter(({ name }) => name.endsWith('.js'))
         .map(({ name, text, originalText }) => `// @filename:${name}\n${
-          originalText.startsWith('// @devtools.output.compiled\r\n')
+          originalText.match(/^\/\/ @devtools.output.compiled\r?\n/)
             ? text
             : originalText
         }`)
@@ -70,6 +70,7 @@ export default definePlugins({
               suggestions: [
                 {
                   label: 'devtools.output.compiled',
+                  detail: 'Display the compiled output in the console\'s `.JS` tab',
                   kind: monaco.languages.CompletionItemKind.Text,
                   insertText: 'devtools.output.compiled',
                   range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
