@@ -1,0 +1,9 @@
+import{j as d,a as c,d as p}from"./index-7eb6f4b7.js";import{u}from"./files-36856eb3.js";const m=window.React.useEffect,f=window.React.useRef,g=window.React.useState,a=({code:s,lang:o,devtoolsWindow:{simport:t}})=>{const[e,n]=g(void 0);t("ui/components/code_highlighter/CodeHighlighter.js").then(({highlightNode:r})=>n(()=>r));const i=f(null);return m(()=>{const r=i.current;r&&(r.textContent=s,e==null||e(r,`text/${o}`))},[s,o,e]),d.jsx("pre",{ref:i,style:{cursor:"text",userSelect:"text",whiteSpace:"pre-wrap",margin:"0",padding:"0 4px"}})},l=window.React.useMemo,h=c("outputs.js",".JS","react",({UI:s,devtoolsWindow:{simport:o}})=>{const t=u();return l(()=>t.find(({name:n})=>n.endsWith("(compile error)")),[t])?d.jsx(a,{code:l(()=>t.filter(({name:n})=>n.endsWith("(compile error)")).map(({text:n})=>n).join(`
+
+`),[t]),lang:"text",devtoolsWindow:{simport:o}}):d.jsx(a,{code:l(()=>t.filter(({name:n})=>n.endsWith(".js")).map(({name:n,text:i,originalText:r})=>`// @filename:${n}
+${r.match(/^\/\/ @devtools.output.compiled\r?\n/)?i:r}`).join(`
+
+`),[t]),lang:"javascript",devtoolsWindow:{simport:o}})}),w=c("outputs.d.ts",".D.TS","react",({UI:s,devtoolsWindow:{simport:o}})=>{const t=u();return d.jsx(a,{code:l(()=>t.filter(({name:e})=>e.endsWith(".d.ts")).map(({name:e,text:n})=>`// @filename:${e}
+${n}`).join(`
+
+`),[t]),lang:"typescript",devtoolsWindow:{simport:o}})}),j=p({editor(s){const o=[s.languages.registerCompletionItemProvider("typescript",{triggerCharacters:["@"],async provideCompletionItems(t,e){if(e.lineNumber!==1)return;if(t.getLineContent(e.lineNumber).startsWith("// @"))return{suggestions:[{label:"devtools.output.compiled",detail:"Display the compiled output in the console's `.JS` tab",kind:s.languages.CompletionItemKind.Text,insertText:"devtools.output.compiled",range:new s.Range(e.lineNumber,e.column,e.lineNumber,e.column)}]}}})];return()=>o.forEach(t=>t.dispose())},devtools:{panels:[h,w]}});export{j as default};
