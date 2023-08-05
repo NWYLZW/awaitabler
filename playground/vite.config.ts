@@ -50,7 +50,9 @@ export default defineConfig(async env => {
   })
 
   return {
-    base: '/awaitabler/',
+    base: process.env.BASE === 'None'
+      ? ''
+      : (process.env.BASE ?? '/awaitabler/'),
     plugins: [
       react(),
       env.mode === 'production' ? viteExternalsPlugin({
