@@ -14,15 +14,15 @@
     html, body { margin: 0; padding: 0; }
     .__chobitsu-hide__ { height: 100% !important; }
   </style>
-  <script src="//unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-  <script src="//unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
 </head>
 <body>
 <script type="module" src='src/pages/eval-logs/index.ts'></script>
 <script type="module" src='src/pages/eval-logs/devtools.ts'></script>
 <script src="/target.js" embedded="true"></script>
-<script src="//unpkg.com/sentinel-js"></script>
-<script src="//unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/sentinel-js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script type="module">
   sentinel.on('.__chobitsu-hide__', _el => {
     const el = /** @type {HTMLDivElement} */ (_el)
